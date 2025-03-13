@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Control Estacionamientos - Cumbres de Quilpué</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .contenedor {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 10px;
+        }
+        .estacionamiento {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .estacionamiento:hover {
+            transform: translateY(-5px);
+        }
+        .disponible {
+            background-color: #e8f5e9;
+        }
+        .ocupado {
+            background-color: #ffebee;
+        }
+        .contador {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+        .warning-icon {
+            color: #e67e22;
+            font-size: 1.5em;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: left;
+        }
+        .modal-content h2 {
+            margin-top: 0;
+        }
+        .modal-content p {
+            margin: 10px 0;
+        }
+        .modal-content button {
+            margin-top: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        .modal-content button:hover {
+            background-color: #2980b9;
+        }
+        .botones-importar {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .botones-importar button {
+            padding: 8px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            margin: 0 5px;
+        }
+        .botones-importar button:hover {
+            background-color: #2980b9;
+        }
+        #fileInput {
+            display: none;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            background-color: #f1f1f1;
+            margin: 0 5px;
+            border-radius: 5px 5px 0 0;
+            transition: background-color 0.3s;
+        }
+        .tab.active {
+            background-color: #fff;
+            font-weight: bold;
+            border-color: #ccc;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 0 0 8px 8px;
+            background-color: #fff;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .historial-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Control de 30 Estacionamientos</h1>
+    <div class="botones-importar">
+        <button onclick="exportarExcel()">Exportar a Excel</button>
+        <button onclick="exportarPDF()">Exportar a PDF</button>
+        <button onclick="document.getElementById('fileInput').click()">Importar Datos</button>
+        <input type="file" id="fileInput" accept=".csv">
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="mostrarTab('en-uso')">En Uso</div>
+        <div class="tab" onclick="mostrarTab('historial')">Historial</div>
+    </div>
+
+    <div id="en-uso" class="tab-content active">
+        <div class="contenedor" id="contenedor"></div>
+    </div>
+
+    <div id="historial" class="tab-content">
+        <h2>Registro Histórico de Visitas</h2>
+        <div class="historial-container">
+            <table id="registroVisitas">
+                <thead>
+                    <tr>
+                        <th>Estacionamiento</th>
+                        <th>Nombre</th>
+                        <th>Patente</th>
+                        <th>Departamento</th>
+                        <th>Hora Llegada</th>
+                        <th>Hora Salida</th>
+                        <th>Tiempo Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-titulo"></h2>
+            <p><strong>Nombre:</strong> <span id="modal-nombre"></span></p>
+            <p><strong>Patente:</strong> <span id="modal-patente"></span></p>
+            <p><strong>Departamento:</strong> <span id="modal-departamento"></span></p>
+            <p><strong>Hora Llegada:</strong> <span id="modal-llegada"></span></p>
+            <p><strong>Tiempo Restante:</strong> <span id="modal-tiempo"></span></p>
+            <button onclick="liberarDesdeModal()">Liberar</button>
+            <button onclick="cerrarModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        const estacionamientos = Array(30).fill().map((_, i) => ({
+            id: i + 1,
+            ocupado: false,
+            contador: 8 * 60 * 60,
+            datos: null,
+            timer: null
+        }));
+
+        const registroVisitas = [];
+        let estacionamientoActual = null;
+
+        function mostrarTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`[onclick="mostrarTab('${tabId}')"]`).classList.add('active');
+        }
+
+        function actualizarDisplay() {
+            const contenedor = document.getElementById('contenedor');
+            contenedor.innerHTML = '';
+            
+            estacionamientos.forEach(est => {
+                const div = document.createElement('div');
+                div.className = `estacionamiento ${est.ocupado ? 'ocupado' : 'disponible'}`;
+                div.innerHTML = `
+                    <h3>Estacionamiento ${est.id}</h3>
+                    <div class="contador">${formatoTiempo(est.contador)}</div>
+                    ${est.ocupado && est.contador <= 15 * 60 ? '<i class="fas fa-exclamation-triangle warning-icon"></i>' : ''}
+                `;
+                div.onclick = () => mostrarModal(est.id);
+                contenedor.appendChild(div);
+            });
+        }
+
+        function formatoTiempo(segundos) {
+            const horas = Math.floor(segundos / 3600);
+            const minutos = Math.floor((segundos % 3600) / 60);
+            const segs = segundos % 60;
+            return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segs).padStart(2, '0')}`;
+        }
+
+        function ocupar(id) {
+            const est = estacionamientos.find(e => e.id === id);
+            const datos = {
+                nombre: prompt('Nombre del residente:'),
+                patente: prompt('Patente del vehículo:').toUpperCase(),
+                departamento: prompt('Departamento:'),
+                horarioInicio: new Date().toISOString(),
+                horarioLlegada: new Date().toLocaleTimeString()
+            };
+            
+            est.ocupado = true;
+            est.datos = datos;
+            est.contador = 8 * 60 * 60;
+            actualizarDisplay();
+            startTimer(id);
+        }
+
+        function liberar(id) {
+            const est = estacionamientos.find(e => e.id === id);
+            const horaSalida = new Date();
+            est.datos.horarioSalida = horaSalida.toLocaleTimeString();
+            
+            const inicio = new Date(est.datos.horarioInicio);
+            const tiempoTotal = Math.floor((horaSalida - inicio) / 1000);
+            
+            registroVisitas.push({
+                estacionamiento: est.id,
+                nombre: est.datos.nombre,
+                patente: est.datos.patente,
+                departamento: est.datos.departamento,
+                llegada: est.datos.horarioLlegada,
+                salida: est.datos.horarioSalida,
+                tiempoTotal: formatoTiempo(tiempoTotal)
+            });
+            
+            actualizarRegistro();
+            est.ocupado = false;
+            clearInterval(est.timer);
+            est.timer = null;
+            actualizarDisplay();
+            cerrarModal();
+        }
+
+        function liberarDesdeModal() {
+            if (estacionamientoActual !== null) {
+                liberar(estacionamientoActual);
+            }
+        }
+
+        function startTimer(id) {
+            const est = estacionamientos.find(e => e.id === id);
+            const inicio = new Date(est.datos.horarioInicio).getTime();
+            
+            est.timer = setInterval(() => {
+                const ahora = new Date().getTime();
+                const tiempoTranscurrido = Math.floor((ahora - inicio) / 1000);
+                est.contador = Math.max(8 * 3600 - tiempoTranscurrido, 0);
+                
+                if (est.contador <= 0) {
+                    clearInterval(est.timer);
+                    est.timer = null;
+                    alert(`¡El estacionamiento ${id} ha alcanzado el límite de 8 horas!`);
+                    liberar(id);
+                }
+                actualizarDisplay();
+            }, 1000);
+        }
+
+        function mostrarModal(id) {
+            const est = estacionamientos.find(e => e.id === id);
+            estacionamientoActual = id;
+            if (est.ocupado) {
+                document.getElementById('modal-titulo').innerText = `Estacionamiento ${est.id}`;
+                document.getElementById('modal-nombre').innerText = est.datos.nombre;
+                document.getElementById('modal-patente').innerText = est.datos.patente;
+                document.getElementById('modal-departamento').innerText = est.datos.departamento;
+                document.getElementById('modal-llegada').innerText = est.datos.horarioLlegada;
+                document.getElementById('modal-tiempo').innerText = formatoTiempo(est.contador);
+                document.getElementById('modal').style.display = 'flex';
+            } else {
+                ocupar(id);
+            }
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal').style.display = 'none';
+            estacionamientoActual = null;
+        }
+
+        function actualizarRegistro() {
+            const tbody = document.querySelector('#registroVisitas tbody');
+            tbody.innerHTML = '';
+            
+            registroVisitas.forEach(visita => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${visita.estacionamiento}</td>
+                    <td>${visita.nombre}</td>
+                    <td>${visita.patente}</td>
+                    <td>${visita.departamento}</td>
+                    <td>${visita.llegada}</td>
+                    <td>${visita.salida}</td>
+                    <td>${visita.tiempoTotal}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportarExcel() {
+            const datosExportar = registroVisitas.map(visita => ({
+                Estacionamiento: visita.estacionamiento,
+                Nombre: visita.nombre,
+                Patente: visita.patente,
+                Departamento: visita.departamento,
+                'Hora Llegada': visita.llegada,
+                'Hora Salida': visita.salida,
+                'Tiempo Total': visita.tiempoTotal
+            }));
+
+            const csv = Papa.unparse(datosExportar);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `registro_visitas_${new Date().toLocaleDateString()}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.autoTable({
+                head: [['Estacionamiento', 'Nombre', 'Patente', 'Departamento', 'Hora Llegada', 'Hora Salida', 'Tiempo Total']],
+                body: registroVisitas.map(visita => [
+                    visita.estacionamiento,
+                    visita.nombre,
+                    visita.patente,
+                    visita.departamento,
+                    visita.llegada,
+                    visita.salida,
+                    visita.tiempoTotal
+                ])
+            });
+            
+            doc.save(`registro_visitas_${new Date().toLocaleDateString()}.pdf`);
+        }
+
+        // Inicializar
+        actualizarDisplay();
+    </script>
+</body>
+</html>
