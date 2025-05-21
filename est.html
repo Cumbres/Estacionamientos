@@ -2,428 +2,1126 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Control Estacionamientos - Cumbres de Quilpué</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Estacionamientos Avanzado v2 - Cumbres de Quilpué</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            padding: 20px;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
             margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            text-transform: uppercase; /* NUEVO: Aplicar mayúsculas globalmente donde sea posible */
         }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 20px;
+
+        input, textarea, select, button {
+            text-transform: uppercase; /* Asegurar que los controles de formulario también tiendan a mayúsculas */
         }
-        .contenedor {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            padding: 10px;
+        /* Para placeholders, se necesita un selector más específico */
+        ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+          color: #999;
+          opacity: 1; /* Firefox */
+          text-transform: none; /* Placeholder puede ser normal o uppercase si se desea */
         }
-        .estacionamiento {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+        :-ms-input-placeholder { /* Internet Explorer 10-11 */
+          color: #999;
+          text-transform: none;
+        }
+        ::-ms-input-placeholder { /* Microsoft Edge */
+          color: #999;
+          text-transform: none;
+        }
+
+
+        .container-fluid {
+            max-width: 1300px; /* Un poco más ancho para nuevas columnas */
+            margin: 0 auto;
             padding: 15px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: transform 0.2s;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
         }
-        .estacionamiento:hover {
-            transform: translateY(-5px);
+
+        header h1 {
+            margin: 0;
+            font-weight: 600;
         }
-        .disponible {
-            background-color: #e8f5e9;
-        }
-        .ocupado {
-            background-color: #ffebee;
-        }
-        .contador {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin: 10px 0;
-            color: #2c3e50;
-        }
-        .warning-icon {
-            color: #e67e22;
-            font-size: 1.5em;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+
+        .actions-bar {
+            display: flex;
             justify-content: center;
             align-items: center;
+            flex-wrap: wrap; /* Para que se adapte en pantallas pequeñas */
+            gap: 10px; /* Reducido un poco el gap */
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
-        .modal-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            width: 300px;
-            text-align: left;
-        }
-        .modal-content h2 {
-            margin-top: 0;
-        }
-        .modal-content p {
-            margin: 10px 0;
-        }
-        .modal-content button {
-            margin-top: 20px;
-            padding: 8px 15px;
-            cursor: pointer;
+
+        .actions-bar button, .actions-bar input[type="file"] {
+            padding: 10px 15px; /* Ajustado padding */
+            font-size: 0.9rem; /* Ajustado tamaño de fuente */
             border: none;
-            border-radius: 5px;
-            background-color: #3498db;
-            color: white;
-            font-size: 14px;
-            transition: background-color 0.3s;
-            margin-right: 10px;
-        }
-        .modal-content button:hover {
-            background-color: #2980b9;
-        }
-        .botones-importar {
-            margin: 20px 0;
-            text-align: center;
-        }
-        .botones-importar button {
-            padding: 8px 15px;
+            border-radius: var(--border-radius);
             cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #3498db;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            background-color: var(--primary-color);
             color: white;
-            font-size: 14px;
-            transition: background-color 0.3s;
-            margin: 0 5px;
         }
-        .botones-importar button:hover {
+        .actions-bar button:hover {
             background-color: #2980b9;
+            transform: translateY(-2px);
         }
-        #fileInput {
-            display: none;
+        .actions-bar button i {
+            margin-right: 8px;
         }
+        #fileInput { display: none; }
+        .file-upload-label {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            background-color: var(--secondary-color);
+            color: white;
+            display: inline-block; /* Para que se comporte como botón */
+        }
+        .file-upload-label:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+
         .tabs {
             display: flex;
             margin-bottom: 20px;
-            justify-content: center;
+            background-color: var(--card-background);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
+
         .tab {
-            padding: 10px 20px;
+            padding: 15px 25px;
             cursor: pointer;
-            border: 1px solid #ccc;
-            border-bottom: none;
-            background-color: #f1f1f1;
-            margin: 0 5px;
-            border-radius: 5px 5px 0 0;
-            transition: background-color 0.3s;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border-bottom: 3px solid transparent;
+            transition: background-color 0.3s, border-color 0.3s;
+            font-weight: 500;
+            flex-grow: 1;
+            text-align: center;
         }
+
+        .tab:hover {
+            background-color: #dfe6e9;
+        }
+
         .tab.active {
-            background-color: #fff;
-            font-weight: bold;
-            border-color: #ccc;
+            background-color: var(--card-background);
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            font-weight: 600;
         }
+
         .tab-content {
             display: none;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 0 0 8px 8px;
-            background-color: #fff;
+            padding: 25px;
+            background-color: var(--card-background);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
+
         .tab-content.active {
             display: block;
         }
-        .historial-container {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-top: 20px;
+
+        .parking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Aumentado minmax */
+            gap: 20px;
         }
+
+        .parking-spot {
+            background-color: var(--card-background);
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+
+        .parking-spot:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .parking-spot h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+        .parking-spot .status-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .parking-spot.disponible {
+            border-left: 5px solid var(--secondary-color);
+        }
+        .parking-spot.disponible .status-icon { color: var(--secondary-color); }
+
+
+        .parking-spot.ocupado {
+            border-left: 5px solid var(--danger-color);
+        }
+        .parking-spot.ocupado .status-icon { color: var(--danger-color); }
+
+
+        .parking-spot .timer {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        .parking-spot .spot-info { /* Contenedor para patente y unidad */
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            word-break: break-all; /* Para patentes o unidades largas */
+        }
+
+
+        .warning-icon {
+            color: var(--warning-color);
+            font-size: 1.2em;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .time-expired-warning {
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-background);
+            margin: auto;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 550px; /* Un poco más ancho para el formulario */
+            animation: fadeInModal 0.3s ease-out;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .modal-content p { margin: 10px 0; font-size: 1rem; }
+        .modal-content strong { font-weight: 500; }
+
+        .modal-content label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        .modal-content input[type="text"] {
+            width: calc(100% - 22px); /* Ajustar por padding y borde */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        /* NUEVO: Estilos para checkboxes */
+        .form-checkbox-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .form-checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            width: auto; /* Reset width for checkboxes */
+            height: 1.2em; /* Adjust size */
+            cursor: pointer;
+        }
+        .form-checkbox-group label {
+            margin-bottom: 0; /* Reset margin for labels next to checkboxes */
+            font-weight: normal; /* Checkbox labels can be normal weight */
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+
+        .modal-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .modal-buttons .btn-primary { background-color: var(--primary-color); color: white; }
+        .modal-buttons .btn-primary:hover { background-color: #2980b9; }
+        .modal-buttons .btn-danger { background-color: var(--danger-color); color: white; }
+        .modal-buttons .btn-danger:hover { background-color: #c0392b; }
+        .modal-buttons .btn-secondary { background-color: #7f8c8d; color: white; }
+        .modal-buttons .btn-secondary:hover { background-color: #6c7a89; }
+
+
+        .history-table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            background-color: #fff;
+            background-color: var(--card-background);
         }
+
         th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
+            border: 1px solid #e0e0e0;
+            padding: 10px 12px; /* Ajustado padding */
             text-align: left;
+            font-size: 0.85rem; /* Reducido para más columnas */
+            word-break: break-word;
         }
+
         th {
-            background-color: #3498db;
+            background-color: var(--primary-color);
             color: white;
             position: sticky;
             top: 0;
+            z-index: 10;
+            font-weight: 500;
         }
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tbody tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--dark-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.5s ease, bottom 0.5s ease;
+            font-size: 1rem;
+        }
+        .toast.show {
+            opacity: 1;
+            bottom: 30px;
+        }
+        /* NUEVO: Estilo para alerta custom */
+        #customAlertModal .modal-content {
+            max-width: 450px;
+            border-left: 5px solid var(--danger-color);
+        }
+        #customAlertModal h2 {
+            color: var(--danger-color);
+        }
+        #customAlertMessage {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            white-space: pre-line; /* Para respetar saltos de línea */
+        }
+
     </style>
 </head>
 <body>
-    <h1>Control de 30 Estacionamientos</h1>
-    <div class="botones-importar">
-        <button onclick="exportarExcel()">Exportar a Excel</button>
-        <button onclick="exportarPDF()">Exportar a PDF</button>
-        <button onclick="document.getElementById('fileInput').click()">Importar Datos</button>
-        <input type="file" id="fileInput" accept=".csv">
-    </div>
+    <div class="container-fluid">
+        <header>
+            <h1><i class="fas fa-parking"></i> CONTROL ESTACIONAMIENTOS - CUMBRES DE QUILPUÉ</h1>
+        </header>
 
-    <div class="tabs">
-        <div class="tab active" onclick="mostrarTab('en-uso')">En Uso</div>
-        <div class="tab" onclick="mostrarTab('historial')">Historial</div>
-    </div>
+        <div class="actions-bar">
+            <button onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR A EXCEL</button>
+            <button onclick="exportarPDFHistorial()"><i class="fas fa-file-pdf"></i> EXPORTAR HISTORIAL PDF</button>
+            <button onclick="exportarPDFActual()"><i class="fas fa-file-invoice"></i> PDF USO ACTUAL</button>
+            <label for="fileInput" class="file-upload-label"><i class="fas fa-upload"></i> IMPORTAR DATOS CSV</label>
+            <input type="file" id="fileInput" accept=".csv" onchange="importarDatos(event)">
+        </div>
 
-    <div id="en-uso" class="tab-content active">
-        <div class="contenedor" id="contenedor"></div>
-    </div>
+        <div class="tabs">
+            <div class="tab active" onclick="mostrarTab('en-uso', this)"><i class="fas fa-car"></i> EN USO</div>
+            <div class="tab" onclick="mostrarTab('historial', this)"><i class="fas fa-history"></i> HISTORIAL</div>
+        </div>
 
-    <div id="historial" class="tab-content">
-        <h2>Registro Histórico de Visitas</h2>
-        <div class="historial-container">
-            <table id="registroVisitas">
-                <thead>
-                    <tr>
-                        <th>Estacionamiento</th>
-                        <th>Nombre</th>
-                        <th>Patente</th>
-                        <th>Departamento</th>
-                        <th>Hora Llegada</th>
-                        <th>Hora Salida</th>
-                        <th>Tiempo Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+        <div id="en-uso" class="tab-content active">
+            <div class="parking-grid" id="parkingGrid"></div>
+        </div>
+
+        <div id="historial" class="tab-content">
+            <h2><i class="fas fa-clipboard-list"></i> REGISTRO HISTÓRICO DE VISITAS</h2>
+            <div class="history-table-container">
+                <table id="registroVisitasTable">
+                    <thead>
+                        <tr>
+                            <th>N° EST.</th>
+                            <th>NOMBRE</th>
+                            <th>RUT</th> <th>PATENTE</th>
+                            <th>UNIDAD</th>
+                            <th>H. INGRESO</th>
+                            <th>H. SALIDA</th>
+                            <th>T. TOTAL</th>
+                            <th>CF</th> <th>NOTIF.</th> <th>ESTADO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div id="modal" class="modal">
+    <div id="infoModal" class="modal">
         <div class="modal-content">
-            <h2 id="modal-titulo"></h2>
-            <p><strong>Nombre:</strong> <span id="modal-nombre"></span></p>
-            <p><strong>Patente:</strong> <span id="modal-patente"></span></p>
-            <p><strong>Departamento:</strong> <span id="modal-departamento"></span></p>
-            <p><strong>Hora Llegada:</strong> <span id="modal-llegada"></span></p>
-            <p><strong>Tiempo Restante:</strong> <span id="modal-tiempo"></span></p>
-            <button onclick="liberarDesdeModal()">Liberar</button>
-            <button onclick="cerrarModal()">Cerrar</button>
+            <h2 id="modalTitulo"></h2>
+            <div id="formOcupar">
+                <label for="nombreInput">NOMBRE RESIDENTE/VISITA:</label>
+                <input type="text" id="nombreInput" placeholder="EJ: JUAN PÉREZ">
+                
+                <label for="rutInput">RUT (SIN PUNTOS NI GUIÓN, CON DV):</label>
+                <input type="text" id="rutInput" placeholder="EJ: 12345678K">
+
+                <label for="patenteInput">PATENTE VEHÍCULO:</label>
+                <input type="text" id="patenteInput" placeholder="EJ: ABCD12">
+                <label for="unidadInput">UNIDAD (DEPTO/CASA):</label>
+                <input type="text" id="unidadInput" placeholder="EJ: DEPTO 101">
+
+                <div class="form-checkbox-group">
+                    <input type="checkbox" id="ingresadoCFInput">
+                    <label for="ingresadoCFInput">INGRESADO CF (COMUNIDADFELIZ)</label>
+                </div>
+                <div class="form-checkbox-group">
+                    <input type="checkbox" id="notificadoResidenteInput">
+                    <label for="notificadoResidenteInput">NOTIFICADO AL RESIDENTE</label>
+                </div>
+
+                <div class="modal-buttons">
+                    <button class="btn-primary" onclick="confirmarOcupar()"><i class="fas fa-check"></i> CONFIRMAR</button>
+                    <button class="btn-secondary" onclick="cerrarModal()"><i class="fas fa-times"></i> CANCELAR</button>
+                </div>
+            </div>
+            <div id="infoOcupado" style="display:none;">
+                <p><strong>NOMBRE:</strong> <span id="modalNombre"></span></p>
+                <p><strong>RUT:</strong> <span id="modalRut"></span></p> <p><strong>PATENTE:</strong> <span id="modalPatente"></span></p>
+                <p><strong>UNIDAD:</strong> <span id="modalUnidad"></span></p>
+                <p><strong>HORA INGRESO:</strong> <span id="modalIngreso"></span></p>
+                <p><strong>TIEMPO RESTANTE:</strong> <span id="modalTiempoRestante"></span></p>
+                <p><strong>ING. CF:</strong> <span id="modalIngresadoCF"></span></p> <p><strong>NOTIF. RESIDENTE:</strong> <span id="modalNotificadoResidente"></span></p> <div class="modal-buttons">
+                    <button class="btn-danger" onclick="liberarDesdeModal()"><i class="fas fa-unlock"></i> LIBERAR ESTACIONAMIENTO</button>
+                    <button class="btn-secondary" onclick="cerrarModal()"><i class="fas fa-times"></i> CERRAR</button>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div id="customAlertModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-exclamation-triangle"></i> ATENCIÓN</h2>
+            <p id="customAlertMessage"></p>
+            <div class="modal-buttons" style="justify-content: center;">
+                <button class="btn-primary" onclick="cerrarCustomAlert()"><i class="fas fa-check"></i> ENTENDIDO</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="toast" class="toast">MENSAJE</div>
 
     <script>
-        const estacionamientos = Array(30).fill().map((_, i) => ({
-            id: i + 1,
-            ocupado: false,
-            contador: 8 * 60 * 60,
-            datos: null,
-            timer: null
-        }));
+        const TOTAL_ESTACIONAMIENTOS = 30;
+        const TIEMPO_MAXIMO_SEGUNDOS = 8 * 60 * 60; // 8 horas
+        const INTERVALO_GUARDADO_AUTO = 10 * 60 * 1000; // 10 minutos
+        const CORREO_DESTINO_1 = "comitecumbresdequilpue@gmail.com";
+        const CORREO_DESTINO_2 = "condominiocumbresdequilpue@gmail.com";
 
-        const registroVisitas = [];
-        let estacionamientoActual = null;
+        let estacionamientos = [];
+        let registroVisitas = [];
+        let estacionamientoSeleccionadoId = null;
+        let autoSaveInterval;
 
-        function mostrarTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
+        // --- INICIALIZACIÓN Y MANEJO DE DATOS LOCALES ---
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarDatosLocales();
+            if (estacionamientos.length === 0) { 
+                inicializarEstacionamientos();
+            }
+            actualizarDisplayEstacionamientos();
+            actualizarTablaHistorial();
+            iniciarGuardadoAutomatico();
+            configurarRevisionAutomaticaEmail();
+            mostrarTab('en-uso', document.querySelector('.tab.active')); 
+            configurarInputsMayusculas(); // NUEVO
+        });
+
+        window.addEventListener('beforeunload', guardarDatosLocales); 
+
+        // NUEVO: Configurar inputs para convertir a mayúsculas automáticamente
+        function configurarInputsMayusculas() {
+            const inputsTexto = document.querySelectorAll('#formOcupar input[type="text"]');
+            inputsTexto.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase();
+                });
             });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.getElementById(tabId).classList.add('active');
-            document.querySelector(`[onclick="mostrarTab('${tabId}')"]`).classList.add('active');
         }
 
-        function actualizarDisplay() {
-            const contenedor = document.getElementById('contenedor');
-            contenedor.innerHTML = '';
-            
+
+        function inicializarEstacionamientos() {
+            estacionamientos = Array(TOTAL_ESTACIONAMIENTOS).fill(null).map((_, i) => ({
+                id: i + 1,
+                ocupado: false,
+                // MODIFICADO: estructura de datosVehiculo
+                datosVehiculo: null, // { nombre, rut, patente, unidad, horaIngresoISO, horaIngresoDisplay, ingresadoCF, notificadoResidente }
+                timerId: null,
+                tiempoRestanteSegundos: TIEMPO_MAXIMO_SEGUNDOS
+            }));
+        }
+
+        function cargarDatosLocales() {
+            const datosGuardados = localStorage.getItem('controlEstacionamientosCumbresV2'); // Cambiado nombre de item para evitar conflictos con versiones antiguas
+            if (datosGuardados) {
+                try {
+                    const parsedData = JSON.parse(datosGuardados);
+                    estacionamientos = parsedData.estacionamientos || [];
+                    registroVisitas = parsedData.registroVisitas || [];
+
+                    estacionamientos.forEach(est => {
+                        if (est.ocupado && est.datosVehiculo && est.datosVehiculo.horaIngresoISO) {
+                            const tiempoDesdeIngreso = (new Date() - new Date(est.datosVehiculo.horaIngresoISO)) / 1000;
+                            est.tiempoRestanteSegundos = Math.max(0, TIEMPO_MAXIMO_SEGUNDOS - tiempoDesdeIngreso);
+                            if (est.tiempoRestanteSegundos > 0) {
+                                iniciarTimerEstacionamiento(est.id);
+                            } else {
+                                console.warn(`ESTACIONAMIENTO ${est.id} CARGADO CON TIEMPO EXPIRADO.`);
+                            }
+                        } else if (!est.ocupado) {
+                            est.tiempoRestanteSegundos = TIEMPO_MAXIMO_SEGUNDOS;
+                        }
+                         // Asegurar que los datos textuales estén en mayúsculas al cargar (para datos antiguos)
+                        if (est.datosVehiculo) {
+                            if(est.datosVehiculo.nombre) est.datosVehiculo.nombre = est.datosVehiculo.nombre.toUpperCase();
+                            if(est.datosVehiculo.rut) est.datosVehiculo.rut = est.datosVehiculo.rut.toUpperCase();
+                            if(est.datosVehiculo.patente) est.datosVehiculo.patente = est.datosVehiculo.patente.toUpperCase();
+                            if(est.datosVehiculo.unidad) est.datosVehiculo.unidad = est.datosVehiculo.unidad.toUpperCase();
+                        }
+                    });
+                    registroVisitas.forEach(visita => {
+                        if(visita.nombre) visita.nombre = visita.nombre.toUpperCase();
+                        if(visita.rut) visita.rut = visita.rut.toUpperCase();
+                        if(visita.patente) visita.patente = visita.patente.toUpperCase();
+                        if(visita.unidad) visita.unidad = visita.unidad.toUpperCase();
+                        if(visita.estado) visita.estado = visita.estado.toUpperCase();
+                    });
+
+
+                     if (estacionamientos.length !== TOTAL_ESTACIONAMIENTOS || estacionamientos.some(e => typeof e.id === 'undefined')) {
+                        console.warn("DATOS LOCALES CORRUPTOS O DESACTUALIZADOS, REINICIANDO ESTACIONAMIENTOS.");
+                        inicializarEstacionamientos();
+                        registroVisitas = parsedData.registroVisitas || []; 
+                    }
+
+                } catch (error) {
+                    console.error("ERROR AL CARGAR DATOS LOCALES:", error);
+                    inicializarEstacionamientos(); 
+                }
+            } else {
+                inicializarEstacionamientos();
+            }
+        }
+
+        function guardarDatosLocales() {
+            try {
+                const dataToSave = {
+                    estacionamientos: estacionamientos,
+                    registroVisitas: registroVisitas
+                };
+                localStorage.setItem('controlEstacionamientosCumbresV2', JSON.stringify(dataToSave));
+                console.log("DATOS GUARDADOS LOCALMENTE.");
+            } catch (error) {
+                console.error("ERROR AL GUARDAR DATOS LOCALES:", error);
+                mostrarToast("ERROR AL GUARDAR DATOS. ESPACIO LLENO?", 'var(--danger-color)');
+            }
+        }
+
+        function iniciarGuardadoAutomatico() {
+            if (autoSaveInterval) clearInterval(autoSaveInterval);
+            autoSaveInterval = setInterval(() => {
+                guardarDatosLocales();
+                mostrarToast("PROGRESO GUARDADO AUTOMÁTICAMENTE.", 'var(--secondary-color)');
+            }, INTERVALO_GUARDADO_AUTO);
+        }
+
+
+        // --- LÓGICA DE ESTACIONAMIENTOS ---
+        function actualizarDisplayEstacionamientos() {
+            const parkingGrid = document.getElementById('parkingGrid');
+            parkingGrid.innerHTML = '';
             estacionamientos.forEach(est => {
-                const div = document.createElement('div');
-                div.className = `estacionamiento ${est.ocupado ? 'ocupado' : 'disponible'}`;
-                div.innerHTML = `
-                    <h3>Estacionamiento ${est.id}</h3>
-                    <div class="contador">${formatoTiempo(est.contador)}</div>
-                    ${est.ocupado && est.contador <= 15 * 60 ? '<i class="fas fa-exclamation-triangle warning-icon"></i>' : ''}
+                const spotDiv = document.createElement('div');
+                spotDiv.className = `parking-spot ${est.ocupado ? 'ocupado' : 'disponible'}`;
+                spotDiv.onclick = () => abrirModal(est.id);
+
+                let spotInfoContent = '';
+                if (est.ocupado && est.datosVehiculo) {
+                    spotInfoContent = `
+                        <div class="spot-info">
+                            PAT: ${est.datosVehiculo.patente || 'N/A'}<br>
+                            UNI: ${est.datosVehiculo.unidad || 'N/A'}
+                        </div>`;
+                }
+
+                let warningIcon = '';
+                if (est.ocupado && est.tiempoRestanteSegundos <= 15 * 60 && est.tiempoRestanteSegundos > 0) { 
+                    warningIcon = '<i class="fas fa-exclamation-triangle warning-icon"></i>';
+                } else if (est.ocupado && est.tiempoRestanteSegundos === 0) {
+                     warningIcon = '<i class="fas fa-clock warning-icon time-expired-warning" title="TIEMPO EXPIRADO"></i>';
+                }
+
+                spotDiv.innerHTML = `
+                    <h3>EST. ${est.id}</h3>
+                    <i class="fas ${est.ocupado ? 'fa-car-side' : 'fa-check-circle'} status-icon"></i>
+                    <div class="timer">${formatoTiempo(est.tiempoRestanteSegundos)}</div>
+                    ${spotInfoContent}
+                    ${warningIcon}
                 `;
-                div.onclick = () => mostrarModal(est.id);
-                contenedor.appendChild(div);
+                parkingGrid.appendChild(spotDiv);
             });
         }
 
-        function formatoTiempo(segundos) {
-            const horas = Math.floor(segundos / 3600);
-            const minutos = Math.floor((segundos % 3600) / 60);
-            const segs = segundos % 60;
-            return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segs).padStart(2, '0')}`;
+        function iniciarTimerEstacionamiento(idEstacionamiento) {
+            const est = estacionamientos.find(e => e.id === idEstacionamiento);
+            if (!est || !est.ocupado) return;
+            if (est.timerId) clearInterval(est.timerId);
+
+            est.timerId = setInterval(() => {
+                est.tiempoRestanteSegundos = Math.max(0, est.tiempoRestanteSegundos - 1);
+                actualizarDisplayEstacionamientos(); 
+
+                if (est.tiempoRestanteSegundos === 0) {
+                    clearInterval(est.timerId);
+                    est.timerId = null;
+                    mostrarToast(`¡TIEMPO LÍMITE ALCANZADO PARA EST. ${est.id}!`, 'var(--warning-color)');
+                }
+            }, 1000);
         }
 
-        function ocupar(id) {
-            const est = estacionamientos.find(e => e.id === id);
-            const datos = {
-                nombre: prompt('Nombre del residente:'),
-                patente: prompt('Patente del vehículo:').toUpperCase(),
-                departamento: prompt('Departamento:'),
-                horarioInicio: new Date().toISOString(),
-                horarioLlegada: new Date().toLocaleTimeString()
-            };
-            
-            est.ocupado = true;
-            est.datos = datos;
-            est.contador = 8 * 60 * 60;
-            actualizarDisplay();
-            startTimer(id);
+        // MODIFICADO: para incluir nuevos campos
+        function ocuparEstacionamiento(idEstacionamiento, nombre, rut, patente, unidad, ingresadoCF, notificadoResidente) {
+            const est = estacionamientos.find(e => e.id === idEstacionamiento);
+            if (est && !est.ocupado) {
+                const ahora = new Date();
+                est.ocupado = true;
+                est.datosVehiculo = {
+                    nombre: nombre.toUpperCase(),
+                    rut: rut.toUpperCase(),
+                    patente: patente.toUpperCase(),
+                    unidad: unidad.toUpperCase(),
+                    horaIngresoISO: ahora.toISOString(),
+                    horaIngresoDisplay: ahora.toLocaleTimeString('es-CL'),
+                    ingresadoCF: ingresadoCF,
+                    notificadoResidente: notificadoResidente
+                };
+                est.tiempoRestanteSegundos = TIEMPO_MAXIMO_SEGUNDOS;
+                iniciarTimerEstacionamiento(idEstacionamiento);
+                actualizarDisplayEstacionamientos();
+                guardarDatosLocales(); 
+                mostrarToast(`ESTACIONAMIENTO ${idEstacionamiento} OCUPADO.`, 'var(--primary-color)');
+            }
         }
 
-        function liberar(id) {
-            const est = estacionamientos.find(e => e.id === id);
-            const horaSalida = new Date();
-            est.datos.horarioSalida = horaSalida.toLocaleTimeString();
-            
-            const inicio = new Date(est.datos.horarioInicio);
-            const tiempoTotal = Math.floor((horaSalida - inicio) / 1000);
-            
-            registroVisitas.push({
-                estacionamiento: est.id,
-                nombre: est.datos.nombre,
-                patente: est.datos.patente,
-                departamento: est.datos.departamento,
-                llegada: est.datos.horarioLlegada,
-                salida: est.datos.horarioSalida,
-                tiempoTotal: formatoTiempo(tiempoTotal)
-            });
-            
-            actualizarRegistro();
-            est.ocupado = false;
-            clearInterval(est.timer);
-            est.timer = null;
-            actualizarDisplay();
+        function liberarEstacionamiento(idEstacionamiento) {
+            const est = estacionamientos.find(e => e.id === idEstacionamiento);
+            if (est && est.ocupado) {
+                if (est.timerId) clearInterval(est.timerId);
+                est.timerId = null;
+
+                const horaSalida = new Date();
+                const horaIngreso = new Date(est.datosVehiculo.horaIngresoISO);
+                const tiempoTotalSegundos = Math.floor((horaSalida - horaIngreso) / 1000);
+
+                // MODIFICADO: para incluir nuevos campos en el historial
+                registroVisitas.push({
+                    estacionamiento: est.id,
+                    nombre: est.datosVehiculo.nombre,
+                    rut: est.datosVehiculo.rut,
+                    patente: est.datosVehiculo.patente,
+                    unidad: est.datosVehiculo.unidad,
+                    horaIngreso: est.datosVehiculo.horaIngresoDisplay,
+                    horaSalida: horaSalida.toLocaleTimeString('es-CL'),
+                    tiempoTotal: formatoTiempo(tiempoTotalSegundos),
+                    ingresadoCF: est.datosVehiculo.ingresadoCF,
+                    notificadoResidente: est.datosVehiculo.notificadoResidente,
+                    estado: (est.tiempoRestanteSegundos === 0 ? 'EXPIRADO' : 'LIBERADO A TIEMPO').toUpperCase()
+                });
+
+                est.ocupado = false;
+                est.datosVehiculo = null;
+                est.tiempoRestanteSegundos = TIEMPO_MAXIMO_SEGUNDOS;
+
+                actualizarDisplayEstacionamientos();
+                actualizarTablaHistorial();
+                guardarDatosLocales(); 
+                mostrarToast(`ESTACIONAMIENTO ${idEstacionamiento} LIBERADO.`, 'var(--secondary-color)');
+            }
+        }
+
+        // --- MANEJO DE MODALES ---
+        // MODIFICADO: para incluir nuevos campos
+        function abrirModal(idEstacionamiento) {
+            estacionamientoSeleccionadoId = idEstacionamiento;
+            const est = estacionamientos.find(e => e.id === idEstacionamiento);
+            const modal = document.getElementById('infoModal');
+            const modalTitulo = document.getElementById('modalTitulo');
+            const formOcupar = document.getElementById('formOcupar');
+            const infoOcupado = document.getElementById('infoOcupado');
+
+            modalTitulo.textContent = `ESTACIONAMIENTO N° ${est.id}`;
+
+            if (est.ocupado) {
+                document.getElementById('modalNombre').textContent = est.datosVehiculo.nombre || 'N/A';
+                document.getElementById('modalRut').textContent = est.datosVehiculo.rut || 'N/A';
+                document.getElementById('modalPatente').textContent = est.datosVehiculo.patente || 'N/A';
+                document.getElementById('modalUnidad').textContent = est.datosVehiculo.unidad || 'N/A';
+                document.getElementById('modalIngreso').textContent = est.datosVehiculo.horaIngresoDisplay || 'N/A';
+                document.getElementById('modalTiempoRestante').textContent = formatoTiempo(est.tiempoRestanteSegundos);
+                document.getElementById('modalIngresadoCF').textContent = est.datosVehiculo.ingresadoCF ? 'SÍ' : 'NO';
+                document.getElementById('modalNotificadoResidente').textContent = est.datosVehiculo.notificadoResidente ? 'SÍ' : 'NO';
+                formOcupar.style.display = 'none';
+                infoOcupado.style.display = 'block';
+            } else {
+                document.getElementById('nombreInput').value = '';
+                document.getElementById('rutInput').value = '';
+                document.getElementById('patenteInput').value = '';
+                document.getElementById('unidadInput').value = '';
+                document.getElementById('ingresadoCFInput').checked = false;
+                document.getElementById('notificadoResidenteInput').checked = false;
+                formOcupar.style.display = 'block';
+                infoOcupado.style.display = 'none';
+                document.getElementById('nombreInput').focus();
+            }
+            modal.style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('infoModal').style.display = 'none';
+            estacionamientoSeleccionadoId = null;
+        }
+
+        // MODIFICADO: para validación y nuevos campos
+        function confirmarOcupar() {
+            const nombre = document.getElementById('nombreInput').value.trim().toUpperCase();
+            const rut = document.getElementById('rutInput').value.trim().toUpperCase(); // NUEVO
+            const patente = document.getElementById('patenteInput').value.trim().toUpperCase();
+            const unidad = document.getElementById('unidadInput').value.trim().toUpperCase();
+            const ingresadoCF = document.getElementById('ingresadoCFInput').checked; // NUEVO
+            const notificadoResidente = document.getElementById('notificadoResidenteInput').checked; // NUEVO
+
+            if (!nombre || !patente || !unidad || !rut) { // RUT también es obligatorio
+                mostrarCustomAlert('POR FAVOR, COMPLETE TODOS LOS CAMPOS: NOMBRE, RUT, PATENTE Y UNIDAD.');
+                return;
+            }
+            if (patente.length < 4) { 
+                mostrarCustomAlert('LA PATENTE PARECE SER MUY CORTA.');
+                return;
+            }
+            // Validar RUT (muy básico, solo longitud y que no esté vacío)
+            if (rut.length < 7) { // Un RUT chileno tiene al menos 7 dígitos + DV
+                 mostrarCustomAlert('EL RUT INGRESADO NO ES VÁLIDO. DEBE SER SIN PUNTOS NI GUIÓN E INCLUIR DÍGITO VERIFICADOR.');
+                return;
+            }
+
+
+            // NUEVO: Lógica de autorización
+            if (!ingresadoCF || !notificadoResidente) {
+                let mensajeAlerta = "VISITA NO AUTORIZADA A INGRESAR A ESTACIONAMIENTO.\n\nMOTIVOS:\n";
+                if (!ingresadoCF) {
+                    mensajeAlerta += "- NO REGISTRADA EN COMUNIDADFELIZ.\n";
+                }
+                if (!notificadoResidente) {
+                    mensajeAlerta += "- NINGÚN RESIDENTE SOLICITÓ EL INGRESO O NO HA SIDO NOTIFICADO.\n";
+                }
+                mensajeAlerta += "\nFAVOR CONTACTAR A UNIDAD CORRESPONDIENTE.";
+                
+                mostrarCustomAlert(mensajeAlerta);
+                return; // No ocupar el estacionamiento
+            }
+
+            ocuparEstacionamiento(estacionamientoSeleccionadoId, nombre, rut, patente, unidad, ingresadoCF, notificadoResidente);
             cerrarModal();
         }
 
         function liberarDesdeModal() {
-            if (estacionamientoActual !== null) {
-                liberar(estacionamientoActual);
+            if (estacionamientoSeleccionadoId !== null) {
+                liberarEstacionamiento(estacionamientoSeleccionadoId);
             }
+            cerrarModal();
+        }
+        
+        // NUEVO: Funciones para alerta custom
+        function mostrarCustomAlert(mensaje) {
+            document.getElementById('customAlertMessage').innerText = mensaje.toUpperCase();
+            document.getElementById('customAlertModal').style.display = 'flex';
         }
 
-        function startTimer(id) {
-            const est = estacionamientos.find(e => e.id === id);
-            const inicio = new Date(est.datos.horarioInicio).getTime();
-            
-            est.timer = setInterval(() => {
-                const ahora = new Date().getTime();
-                const tiempoTranscurrido = Math.floor((ahora - inicio) / 1000);
-                est.contador = Math.max(8 * 3600 - tiempoTranscurrido, 0);
-                
-                if (est.contador <= 0) {
-                    clearInterval(est.timer);
-                    est.timer = null;
-                    alert(`¡El estacionamiento ${id} ha alcanzado el límite de 8 horas!`);
-                    liberar(id);
-                }
-                actualizarDisplay();
-            }, 1000);
+        function cerrarCustomAlert() {
+            document.getElementById('customAlertModal').style.display = 'none';
         }
 
-        function mostrarModal(id) {
-            const est = estacionamientos.find(e => e.id === id);
-            estacionamientoActual = id;
-            if (est.ocupado) {
-                document.getElementById('modal-titulo').innerText = `Estacionamiento ${est.id}`;
-                document.getElementById('modal-nombre').innerText = est.datos.nombre;
-                document.getElementById('modal-patente').innerText = est.datos.patente;
-                document.getElementById('modal-departamento').innerText = est.datos.departamento;
-                document.getElementById('modal-llegada').innerText = est.datos.horarioLlegada;
-                document.getElementById('modal-tiempo').innerText = formatoTiempo(est.contador);
-                document.getElementById('modal').style.display = 'flex';
-            } else {
-                ocupar(id);
-            }
-        }
 
-        function cerrarModal() {
-            document.getElementById('modal').style.display = 'none';
-            estacionamientoActual = null;
-        }
-
-        function actualizarRegistro() {
-            const tbody = document.querySelector('#registroVisitas tbody');
+        // --- HISTORIAL ---
+        // MODIFICADO: para incluir nuevos campos
+        function actualizarTablaHistorial() {
+            const tbody = document.querySelector('#registroVisitasTable tbody');
             tbody.innerHTML = '';
-            
-            registroVisitas.forEach(visita => {
+            [...registroVisitas].reverse().forEach(visita => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${visita.estacionamiento}</td>
-                    <td>${visita.nombre}</td>
-                    <td>${visita.patente}</td>
-                    <td>${visita.departamento}</td>
-                    <td>${visita.llegada}</td>
-                    <td>${visita.salida}</td>
-                    <td>${visita.tiempoTotal}</td>
+                    <td>${(visita.nombre || '-').toUpperCase()}</td>
+                    <td>${(visita.rut || '-').toUpperCase()}</td>
+                    <td>${(visita.patente || '-').toUpperCase()}</td>
+                    <td>${(visita.unidad || '-').toUpperCase()}</td>
+                    <td>${visita.horaIngreso || '-'}</td>
+                    <td>${visita.horaSalida || '-'}</td>
+                    <td>${visita.tiempoTotal || '-'}</td>
+                    <td>${visita.ingresadoCF ? 'SÍ' : 'NO'}</td>
+                    <td>${visita.notificadoResidente ? 'SÍ' : 'NO'}</td>
+                    <td>${(visita.estado || 'LIBERADO').toUpperCase()}</td>
                 `;
+                 if (visita.estado && visita.estado.toUpperCase() === 'EXPIRADO') {
+                    tr.style.backgroundColor = 'var(--warning-color-light, #ffe0b2)'; 
+                    tr.style.color = 'var(--danger-color)';
+                }
                 tbody.appendChild(tr);
             });
         }
 
+
+        // --- EXPORTACIÓN / IMPORTACIÓN ---
+        // MODIFICADO: para incluir nuevos campos
         function exportarExcel() {
-            const datosExportar = registroVisitas.map(visita => ({
-                Estacionamiento: visita.estacionamiento,
-                Nombre: visita.nombre,
-                Patente: visita.patente,
-                Departamento: visita.departamento,
-                'Hora Llegada': visita.llegada,
-                'Hora Salida': visita.salida,
-                'Tiempo Total': visita.tiempoTotal
+            if (registroVisitas.length === 0) {
+                mostrarToast("NO HAY DATOS EN EL HISTORIAL PARA EXPORTAR.", 'var(--warning-color)');
+                return;
+            }
+            const datosExportar = registroVisitas.map(v => ({
+                'N° EST.': v.estacionamiento,
+                'NOMBRE': (v.nombre || '').toUpperCase(),
+                'RUT': (v.rut || '').toUpperCase(),
+                'PATENTE': (v.patente || '').toUpperCase(),
+                'UNIDAD': (v.unidad || '').toUpperCase(),
+                'H. INGRESO': v.horaIngreso,
+                'H. SALIDA': v.horaSalida,
+                'T. TOTAL': v.tiempoTotal,
+                'ING. CF': v.ingresadoCF ? 'SÍ' : 'NO',
+                'NOTIF. RESID.': v.notificadoResidente ? 'SÍ' : 'NO',
+                'ESTADO': (v.estado || '').toUpperCase()
+            }));
+            const worksheet = XLSX.utils.json_to_sheet(datosExportar);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "HistorialVisitas");
+            XLSX.writeFile(workbook, `HISTORIAL_ESTACIONAMIENTOS_${fechaFormatoArchivo()}.xlsx`);
+            mostrarToast("HISTORIAL EXPORTADO A EXCEL.", 'var(--secondary-color)');
+        }
+
+        // MODIFICADO: para incluir nuevos campos
+        function generarPDF(titulo, head, bodyData, nombreArchivo) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+
+            doc.setFontSize(16); // Un poco más pequeño para caber más
+            doc.text(titulo.toUpperCase(), 14, 15);
+            doc.setFontSize(9);
+            doc.text(`GENERADO: ${new Date().toLocaleString('es-CL')}`, 14, 21);
+
+            // Convertir todos los datos del cuerpo a string y mayúsculas para el PDF
+            const bodyDataProcessed = bodyData.map(row => row.map(cell => {
+                if (typeof cell === 'boolean') return cell ? 'SÍ' : 'NO';
+                return (cell === null || typeof cell === 'undefined') ? '' : String(cell).toUpperCase();
             }));
 
-            const csv = Papa.unparse(datosExportar);
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `registro_visitas_${new Date().toLocaleDateString()}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
 
-        function exportarPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
             doc.autoTable({
-                head: [['Estacionamiento', 'Nombre', 'Patente', 'Departamento', 'Hora Llegada', 'Hora Salida', 'Tiempo Total']],
-                body: registroVisitas.map(visita => [
-                    visita.estacionamiento,
-                    visita.nombre,
-                    visita.patente,
-                    visita.departamento,
-                    visita.llegada,
-                    visita.salida,
-                    visita.tiempoTotal
-                ])
+                head: [head.map(h => h.toUpperCase())], // Encabezados en mayúsculas
+                body: bodyDataProcessed,
+                startY: 25,
+                theme: 'grid',
+                headStyles: { fillColor: [52, 152, 219], textColor: [255,255,255], fontStyle: 'bold' },
+                styles: { fontSize: 7, cellPadding: 1.5, overflow: 'linebreak' }, // Reducido aún más
+                columnStyles: { 
+                    0: { cellWidth: 15 }, // N° Est.
+                    // Ajustar anchos según necesidad
+                } 
             });
-            
-            doc.save(`registro_visitas_${new Date().toLocaleDateString()}.pdf`);
+            doc.save(`${nombreArchivo.toUpperCase()}_${fechaFormatoArchivo()}.pdf`);
+        }
+        
+        // MODIFICADO: para incluir nuevos campos
+        function exportarPDFHistorial() {
+            if (registroVisitas.length === 0) {
+                mostrarToast("NO HAY DATOS EN EL HISTORIAL PARA EXPORTAR.", 'var(--warning-color)');
+                return;
+            }
+            const head = ['N° EST.', 'NOMBRE', 'RUT', 'PATENTE', 'UNIDAD', 'H. ING.', 'H. SAL.', 'T. TOTAL', 'CF', 'NOTIF.', 'ESTADO'];
+            const body = registroVisitas.map(v => [
+                v.estacionamiento, v.nombre, v.rut, v.patente, v.unidad,
+                v.horaIngreso, v.horaSalida, v.tiempoTotal, 
+                v.ingresadoCF, v.notificadoResidente, v.estado
+            ]);
+            generarPDF('HISTORIAL DE USO DE ESTACIONAMIENTOS', head, body, 'HISTORIAL_ESTACIONAMIENTOS');
+            mostrarToast("HISTORIAL EXPORTADO A PDF.", 'var(--secondary-color)');
         }
 
-        // Inicializar
-        actualizarDisplay();
+        // MODIFICADO: para incluir nuevos campos
+        function exportarPDFActual(forEmail = false) {
+            const ocupados = estacionamientos.filter(est => est.ocupado && est.datosVehiculo);
+            if (ocupados.length === 0 && !forEmail) { 
+                mostrarToast("NO HAY ESTACIONAMIENTOS EN USO ACTUALMENTE.", 'var(--warning-color)');
+                return null; 
+            }
+
+            const head = ['N° EST.', 'NOMBRE', 'RUT', 'PATENTE', 'UNIDAD', 'H. ING.', 'T. REST.', 'CF', 'NOTIF.'];
+            const body = ocupados.map(est => [
+                est.id,
+                est.datosVehiculo.nombre,
+                est.datosVehiculo.rut,
+                est.datosVehiculo.patente,
+                est.datosVehiculo.unidad,
+                est.datosVehiculo.horaIngresoDisplay,
+                formatoTiempo(est.tiempoRestanteSegundos),
+                est.datosVehiculo.ingresadoCF,
+                est.datosVehiculo.notificadoResidente
+            ]);
+            
+            const titulo = 'INFORME DE ESTACIONAMIENTOS EN USO - CUMBRES DE QUILPUÉ';
+            const nombreArchivo = 'USO_ACTUAL_ESTACIONAMIENTOS';
+
+            if (forEmail) { 
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'landscape' });
+                doc.setFontSize(16);
+                doc.text(titulo.toUpperCase(), 14, 15);
+                doc.setFontSize(9);
+                doc.text(`GENERADO: ${new Date().toLocaleString('es-CL')}`, 14, 21);
+
+                const bodyDataProcessed = body.map(row => row.map(cell => {
+                     if (typeof cell === 'boolean') return cell ? 'SÍ' : 'NO';
+                     return (cell === null || typeof cell === 'undefined') ? '' : String(cell).toUpperCase();
+                }));
+
+                if (ocupados.length > 0) {
+                    doc.autoTable({
+                        head: [head.map(h => h.toUpperCase())], body: bodyDataProcessed, startY: 25, theme: 'grid',
+                        headStyles: { fillColor: [52, 152, 219], textColor: [255,255,255], fontStyle: 'bold' },
+                        styles: { fontSize: 7, cellPadding: 1.5, overflow: 'linebreak' }
+                    });
+                } else {
+                     doc.text("NO HAY ESTACIONAMIENTOS EN USO EN ESTE MOMENTO.", 14, 35);
+                }
+                return doc; 
+            } else { 
+                generarPDF(titulo, head, body, nombreArchivo);
+                mostrarToast("REPORTE DE USO ACTUAL EXPORTADO A PDF.", 'var(--secondary-color)');
+                return null;
+            }
+        }
+
+        // MODIFICADO: para importar nuevos campos (opcionalmente)
+        function importarDatos(event) {
+            const file = event.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        try {
+                            const datosImportados = results.data;
+                            let nuevosRegistros = 0;
+                            datosImportados.forEach(fila => {
+                                // Normalizar nombres de columnas (insensible a mayúsculas/minúsculas y espacios)
+                                const filaNormalizada = {};
+                                for (const key in fila) {
+                                    filaNormalizada[key.trim().toLowerCase().replace(/\s+/g, '')] = fila[key];
+                                }
+
+                                if (filaNormalizada.nest || filaNormalizada.estacionamiento) { // Chequeo mínimo
+                                    registroVisitas.push({
+                                        estacionamiento: parseInt(filaNormalizada.nest || filaNormalizada.estacionamiento) || (filaNormalizada.nest || filaNormalizada.estacionamiento),
+                                        nombre: (filaNormalizada.nombre || '').toUpperCase(),
+                                        rut: (filaNormalizada.rut || '').toUpperCase(),
+                                        patente: (filaNormalizada.patente || '').toUpperCase(),
+                                        unidad: (filaNormalizada.departamento || filaNormalizada.unidad || '').toUpperCase(),
+                                        horaIngreso: filaNormalizada.horallegada || filaNormalizada.hingreso || '',
+                                        horaSalida: filaNormalizada.horasalida || filaNormalizada.hsalida || '',
+                                        tiempoTotal: filaNormalizada.tiempototal || filaNormalizada.ttotal || '',
+                                        ingresadoCF: ['true', 'si', 'sí', 'yes'].includes((filaNormalizada.cf || filaNormalizada.ingresadocf || 'false').toLowerCase()),
+                                        notificadoResidente: ['true', 'si', 'sí', 'yes'].includes((filaNormalizada.notif || filaNormalizada.notificado || filaNormalizada.notificadoresidente || 'false').toLowerCase()),
+                                        estado: (filaNormalizada.estado || 'IMPORTADO').toUpperCase()
+                                    });
+                                    nuevosRegistros++;
+                                }
+                            });
+                            actualizarTablaHistorial();
+                            guardarDatosLocales();
+                            mostrarToast(`${nuevosRegistros} REGISTROS IMPORTADOS AL HISTORIAL.`, 'var(--secondary-color)');
+                        } catch(e) {
+                            console.error("ERROR PROCESANDO CSV:", e);
+                            mostrarToast("ERROR AL PROCESAR EL ARCHIVO CSV.", 'var(--danger-color)');
+                        }
+                    },
+                    error: function(error) {
+                        console.error("ERROR AL PARSEAR CSV:", error);
+                        mostrarToast("ERROR AL LEER EL ARCHIVO CSV.", 'var(--danger-color)');
+                    }
+                });
+                event.target.value = null; 
+            }
+        }
+
+        // --- UTILIDADES ---
+        function formatoTiempo(totalSegundos) {
+            if (isNaN(totalSegundos) || totalSegundos < 0) totalSegundos = 0;
+            const horas = Math.floor(totalSegundos / 3600);
+            const minutos = Math.floor((totalSegundos % 3600) / 60);
+            const segundos = totalSegundos % 60;
+            return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+        }
+
+        function fechaFormatoArchivo() {
+            const d = new Date();
+            return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        function mostrarTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (element) element.classList.add('active'); 
+        }
+
+        function mostrarToast(mensaje, bgColor = 'var(--dark-color)', duracion = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensaje.toUpperCase(); // Toast también en mayúsculas
+            toast.style.backgroundColor = bgColor;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duracion);
+        }
+
+        // --- "ENVÍO AUTOMÁTICO DE CORREO" (SIMULACIÓN/PREPARACIÓN) ---
+        function configurarRevisionAutomaticaEmail() {
+            setInterval(() => {
+                const ahora = new Date();
+                const hora = ahora.getHours();
+                const minutos = ahora.getMinutes();
+
+                if ((hora === 11 && minutos === 0) || (hora === 23 && minutos === 0)) {
+                    console.log(`PREPARANDO INFORME PARA ENVÍO A LAS ${hora}:${minutos}`);
+                    prepararYSimularEnvioEmail();
+                }
+            }, 60 * 1000); 
+        }
+
+        function prepararYSimularEnvioEmail() {
+            mostrarToast("GENERANDO INFORME PDF PARA ENVÍO PROGRAMADO...", 'var(--primary-color)');
+            const pdfDoc = exportarPDFActual(true); 
+
+            if (pdfDoc) {
+                const pdfDataUri = pdfDoc.output('datauristring'); 
+                console.log(`PDF GENERADO PARA ENVIAR A ${CORREO_DESTINO_1} Y ${CORREO_DESTINO_2}`);
+                console.log("DATA URI DEL PDF (PARA DEMOSTRACIÓN):", pdfDataUri.substring(0,100) + "..."); 
+                mostrarToast(`INFORME PDF PREPARADO. EN UN SISTEMA REAL, SE ENVIARÍA A ${CORREO_DESTINO_1} Y ${CORREO_DESTINO_2}.`, 'var(--secondary-color)', 7000);
+            } else {
+                mostrarToast("NO SE GENERÓ PDF PARA EL ENVÍO PROGRAMADO (POSIBLEMENTE NO HAY DATOS).", 'var(--warning-color)');
+                console.log(`INFORME PARA ${CORREO_DESTINO_1} Y ${CORREO_DESTINO_2}: NO HAY VEHÍCULOS ESTACIONADOS.`);
+            }
+        }
+
     </script>
 </body>
 </html>
+
