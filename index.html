@@ -7,7 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -26,7 +27,7 @@
             --occupied-card-color: #e74c3c; /* Color para ocupados */
             --available-card-color: #2ecc71; /* Color para disponibles */
             --total-card-color: #3498db; /* Color para total */
-            --search-border-color: #6a737d; /* Color para borde de búsqueda */
+            --search-border-color: #ccc; /* Color para borde de búsqueda */
         }
 
         /* --- Modo Oscuro --- */
@@ -36,7 +37,7 @@
             --text-color: #ecf0f1;
             --light-color: #3b5066;
             --dark-color: #ecf0f1;
-            --search-border-color: #87CEEB; /* Borde más claro en modo oscuro */
+            --search-border-color: #555; /* Borde más oscuro en modo oscuro */
             --occupied-card-color: #e74c3c;
             --available-card-color: #2ecc71;
             --total-card-color: #3498db;
@@ -75,11 +76,6 @@
         }
         body.dark-mode .toast {
             background-color: #555;
-        }
-        body.dark-mode .search-container input {
-            background-color: var(--light-color);
-            color: var(--text-color);
-            border: 1px solid var(--search-border-color);
         }
         body.dark-mode ::placeholder {
             color: #bbb;
@@ -135,7 +131,7 @@
             font-weight: 600;
         }
 
-        /* --- Paneles Superiores (NUEVO) --- */
+        /* --- Paneles Superiores --- */
         .summary-panels {
             display: flex;
             justify-content: center;
@@ -262,7 +258,7 @@
             display: block;
         }
 
-        /* --- Botón SOS Flotante (NUEVO) --- */
+        /* --- Botón SOS Flotante --- */
         .btn-sos-flotante {
             position: fixed;
             top: 20px; /* Esquina superior derecha */
@@ -286,7 +282,7 @@
             background-color: #c0392b;
         }
 
-        /* --- Botón Modo Oscuro (NUEVO) --- */
+        /* --- Botón Modo Oscuro --- */
         #darkModeToggle {
             background-color: #6a737d;
             color: white;
@@ -300,8 +296,7 @@
             transform: translateY(-2px);
         }
 
-
-        /* --- Mejora visual de búsqueda (NUEVO) --- */
+        /* --- Mejora visual de búsqueda (CORREGIDO) --- */
         .search-container {
             display: flex;
             gap: 10px;
@@ -312,9 +307,11 @@
             flex-grow: 1;
             border: 1px solid var(--search-border-color); /* Borde con contraste */
             color: var(--text-color);
-            background-color: var(--light-color); /* Fondo para contraste */
+            background-color: var(--card-background); /* CORREGIDO: Fondo blanco en modo claro */
             padding: 10px 12px; /* Mejor padding */
             font-size: 1rem; /* Tamaño de fuente más legible */
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .search-container input:focus {
             outline: none;
@@ -327,7 +324,6 @@
         .search-container button:hover {
             background-color: #27ae60;
         }
-
 
         .tabs {
             display: flex;
@@ -647,7 +643,7 @@
             white-space: pre-line;
         }
 
-        /* --- Historial y estadísticas (NUEVO) --- */
+        /* --- Historial y estadísticas --- */
         .history-controls {
             display: flex;
             flex-wrap: wrap;
@@ -787,6 +783,25 @@
             background-color: rgba(0,0,0,0.5);
         }
 
+        /* --- PIE DE PÁGINA (NUEVO) --- */
+        footer {
+            margin-top: 40px;
+            padding: 20px;
+            text-align: center;
+            color: #7f8c8d;
+            border-top: 1px solid #e0e0e0;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+        footer p {
+            margin: 0;
+            font-size: 0.9rem;
+            text-transform: none; /* No aplicar mayúsculas al footer */
+        }
+        body.dark-mode footer {
+            color: #95a5a6;
+            border-top-color: #444;
+        }
+
     </style>
 </head>
 <body>
@@ -826,20 +841,22 @@
                     <button onclick="exportarExcel()"><i class="fas fa-file-excel"></i> HISTORIAL A EXCEL</button>
                     <button onclick="exportarPDFActual()"><i class="fas fa-file-pdf"></i> ESTACIONAMIENTOS EN USO PDF</button>
                     <button onclick="exportarPDFHistorial()"><i class="fas fa-file-pdf"></i> HISTORIAL PDF</button>
-                    <button onclick="notificarAdministracion()"><i class="fas fa-envelope"></i> NOTIFICAR ADM.</button> </div>
+                    <button onclick="notificarAdministracion()"><i class="fas fa-envelope"></i> NOTIFICAR ADM.</button>
+                </div>
             </div>
             
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="BUSCAR (PATENTE, DEPTO, NOMBRE...)" onkeyup="manejarBusqueda(event)">
+                <input type="text" id="searchInput" placeholder="BÚSQUEDA GLOBAL (PATENTE, DEPTO...)" onkeyup="manejarBusqueda(event)">
                 <button onclick="ejecutarBusqueda()"><i class="fas fa-search"></i> BUSCAR</button>
             </div>
             <button onclick="resetearBusqueda()"><i class="fas fa-redo"></i> LIMPIAR BÚSQUEDA</button>
         </div>
 
         <div class="tabs">
-            <div class="tab active" onclick="mostrarTab('en-uso', this)"><i class="fas fa-car"></i> EN USO</div>
-            <div class="tab" onclick="mostrarTab('historial', this)"><i class="fas fa-history"></i> HISTORIAL</div>
-            <div class="tab" onclick="mostrarTab('estadisticas', this)"><i class="fas fa-chart-line"></i> ESTADÍSTICAS</div> </div>
+            <div class="tab active" data-tab="en-uso" onclick="mostrarTab('en-uso', this)"><i class="fas fa-car"></i> EN USO</div>
+            <div class="tab" data-tab="historial" onclick="mostrarTab('historial', this)"><i class="fas fa-history"></i> HISTORIAL</div>
+            <div class="tab" data-tab="estadisticas" onclick="mostrarTab('estadisticas', this)"><i class="fas fa-chart-line"></i> ESTADÍSTICAS</div>
+        </div>
 
         <div id="en-uso" class="tab-content active">
             <div class="parking-grid" id="parkingGrid"></div>
@@ -894,7 +911,8 @@
                             <th>CF</th>
                             <th>NOTIF.</th>
                             <th>ESTADO</th>
-                            <th>FECHA</th> </tr>
+                            <th>FECHA</th>
+                        </tr>
                     </thead>
                     <tbody>
                     </tbody>
@@ -1020,6 +1038,10 @@
 
     <div id="toast" class="toast">MENSAJE</div>
 
+    <footer>
+        <p>&copy; 2025 Condominio Cumbres de Quilpué. Todos los derechos reservados. Uso exclusivo.</p>
+    </footer>
+
     <script>
         const TOTAL_ESTACIONAMIENTOS = 32;
         const TIEMPO_MAXIMO_SEGUNDOS = 8 * 60 * 60; // 8 horas
@@ -1050,13 +1072,13 @@
             }
             actualizarDisplayEstacionamientos();
             actualizarTablaHistorial();
-            actualizarPanelesSuperiores(); // NUEVO: Actualizar paneles al cargar
+            actualizarPanelesSuperiores();
             iniciarGuardadoAutomatico();
             configurarRevisionAutomaticaEmail();
             configurarInputsMayusculas();
-            cargarPreferenciaModoOscuro(); // NUEVO: Cargar preferencia de modo oscuro
-            iniciarSmartAlerts(); // NUEVO: Iniciar alertas inteligentes
-            llenarFiltroConserjes(); // NUEVO: Llenar opciones del filtro de conserjes
+            cargarPreferenciaModoOscuro();
+            iniciarSmartAlerts();
+            llenarFiltroConserjes();
 
             // Mostrar la pestaña "En Uso" por defecto
             mostrarTab('en-uso', document.querySelector('.tabs .tab:first-child')); 
@@ -1112,8 +1134,6 @@
                             if (est.tiempoRestanteSegundos > 0) {
                                 iniciarTimerEstacionamiento(est.id);
                             } else {
-                                // Si el tiempo ha expirado, asegurarse de que el estado refleje esto
-                                // Esto se manejará mejor con las alertas inteligentes ahora
                                 console.warn(`ESTACIONAMIENTO ${est.id} CARGADO CON TIEMPO EXPIRADO.`);
                             }
                         } else if (!est.ocupado) {
@@ -1147,7 +1167,7 @@
                     estacionamientos: estacionamientos,
                     registroVisitas: registroVisitas
                 };
-                localStorage.setItem('controlEstacionamientosCumbresV4', JSON.stringify(dataToSave)); // CAMBIO: Versión 4
+                localStorage.setItem('controlEstacionamientosCumbresV4', JSON.stringify(dataToSave));
                 console.log("DATOS GUARDADOS LOCALMENTE.");
             } catch (error) {
                 console.error("ERROR AL GUARDAR DATOS LOCALES:", error);
@@ -1163,13 +1183,14 @@
             }, INTERVALO_GUARDADO_AUTO);
         }
 
-
         // --- LÓGICA DE ESTACIONAMIENTOS ---
         function actualizarDisplayEstacionamientos() {
             const parkingGrid = document.getElementById('parkingGrid');
             parkingGrid.innerHTML = '';
 
-            const estacionamientosAmostrar = busquedaActiva ? resultadosBusqueda.filter(r => r.type === 'estacionamiento').map(r => r.data) : estacionamientos;
+            const estacionamientosAmostrar = busquedaActiva 
+                ? resultadosBusqueda.filter(r => r.type === 'estacionamiento').map(r => r.data) 
+                : estacionamientos;
 
             estacionamientosAmostrar.forEach(est => {
                 const spotDiv = document.createElement('div');
@@ -1206,10 +1227,13 @@
                 parkingGrid.appendChild(spotDiv);
             });
 
-            if (busquedaActiva && estacionamientosAmostrar.length === 0 && document.getElementById('en-uso').classList.contains('active')) {
-                parkingGrid.innerHTML = '<p style="text-align: center; color: var(--text-color);">NO SE ENCONTRARON ESTACIONAMIENTOS EN USO CON ESTE CRITERIO.</p>';
+            if (estacionamientosAmostrar.length === 0) {
+                 const mensaje = busquedaActiva 
+                    ? 'NO SE ENCONTRARON ESTACIONAMIENTOS EN USO CON ESTE CRITERIO.'
+                    : 'NO HAY DATOS DE ESTACIONAMIENTOS PARA MOSTRAR.';
+                parkingGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: var(--text-color);">${mensaje}</p>`;
             }
-            actualizarPanelesSuperiores(); // Siempre actualizar los paneles después de actualizar el display
+            actualizarPanelesSuperiores();
         }
 
         function iniciarTimerEstacionamiento(idEstacionamiento) {
@@ -1275,8 +1299,8 @@
                     tiempoTotal: formatoTiempo(tiempoTotalSegundos),
                     ingresadoCF: est.datosVehiculo.ingresadoCF,
                     notificadoResidente: est.datosVehiculo.notificadoResidente,
-                    estado: (tiempoTotalSegundos >= TIEMPO_MAXIMO_SEGUNDOS ? 'EXPIRADO' : 'LIBERADO A TIEMPO').toUpperCase(), // Estado actualizado
-                    fecha: horaSalida.toISOString().split('T')[0] // Formato YYYY-MM-DD para el filtro
+                    estado: (tiempoTotalSegundos >= TIEMPO_MAXIMO_SEGUNDOS ? 'EXPIRADO' : 'LIBERADO A TIEMPO').toUpperCase(),
+                    fecha: horaSalida.toISOString().split('T')[0]
                 });
 
                 est.ocupado = false;
@@ -1390,20 +1414,18 @@
             document.getElementById('customAlertModal').style.display = 'none';
         }
 
-        // NUEVO: Alertas Inteligentes
         function iniciarSmartAlerts() {
             if (smartAlertInterval) clearInterval(smartAlertInterval);
             smartAlertInterval = setInterval(revisarTiempoExcedido, INTERVALO_REVISION_ALERTAS);
         }
 
         function revisarTiempoExcedido() {
-            const ahora = new Date().getTime(); // Tiempo actual en milisegundos
+            const ahora = new Date().getTime();
             estacionamientos.forEach(est => {
                 if (est.ocupado && est.datosVehiculo && est.datosVehiculo.horaIngresoISO) {
                     const horaIngresoMs = new Date(est.datosVehiculo.horaIngresoISO).getTime();
                     const tiempoTranscurridoMs = ahora - horaIngresoMs;
                     
-                    // Si el tiempo transcurrido es mayor o igual a 8 horas (TIEMPO_MAXIMO_SEGUNDOS)
                     if (tiempoTranscurridoMs >= TIEMPO_MAXIMO_SEGUNDOS * 1000) {
                         const mensaje = `EL ESTACIONAMIENTO N° ${est.id} HA SUPERADO LAS 8 HORAS DE OCUPACIÓN.\n\n` +
                                         `VEHÍCULO: ${est.datosVehiculo.patente}\n` +
@@ -1424,7 +1446,7 @@
             document.getElementById('smartAlertModal').style.display = 'none';
         }
 
-        // --- PANELES SUPERIORES (NUEVO) ---
+        // --- PANELES SUPERIORES ---
         function actualizarPanelesSuperiores() {
             const ocupadosCount = estacionamientos.filter(est => est.ocupado).length;
             const disponiblesCount = TOTAL_ESTACIONAMIENTOS - ocupadosCount;
@@ -1434,46 +1456,42 @@
             document.getElementById('occupiedSpots').textContent = ocupadosCount;
         }
 
-        // --- HISTORIAL Y ESTADÍSTICAS (NUEVO) ---
+        // --- HISTORIAL Y ESTADÍSTICAS ---
         function actualizarTablaHistorial() {
             const tbody = document.querySelector('#registroVisitasTable tbody');
             tbody.innerHTML = '';
 
-            // Usar registros filtrados si existen, de lo contrario, todos
-            const registrosParaMostrar = (busquedaActiva && document.getElementById('historial').classList.contains('active')) 
-                                        ? resultadosBusqueda.filter(r => r.type === 'historial').map(r => r.data) 
-                                        : registroVisitas;
+            let registrosParaMostrar = busquedaActiva 
+                ? resultadosBusqueda.filter(r => r.type === 'historial').map(r => r.data) 
+                : registroVisitas;
             
-            // Aplicar filtros adicionales del historial
             const filterDate = document.getElementById('filterDate').value;
             const filterConserje = document.getElementById('filterConserje').value;
             const filterAction = document.getElementById('filterAction').value;
 
-            const filteredRecords = registrosParaMostrar.filter(visita => {
-                let match = true;
-                if (filterDate && visita.fecha !== filterDate) {
-                    match = false;
-                }
-                if (filterConserje && (visita.ingresadoPor || '').toUpperCase() !== filterConserje.toUpperCase()) {
-                    match = false;
-                }
-                if (filterAction) {
-                    if (filterAction === "INGRESO" && visita.horaSalida) match = false; // "INGRESO" implica que aún no tiene hora de salida
-                    if (filterAction === "SALIDA" && !visita.horaSalida) match = false; // "SALIDA" implica que ya tiene hora de salida y no es expirado
-                    if (filterAction === "SALIDA" && visita.estado === "EXPIRADO") match = false;
-                    if (filterAction === "EXPIRADO" && visita.estado !== "EXPIRADO") match = false;
-                    // Note: La lógica de "INGRESO" es ambigua sin un campo de acción explícito en el historial.
-                    // Se asume que "INGRESO" es un registro sin hora de salida todavía, lo cual no es el caso en tu estructura actual.
-                    // Tu estructura actual solo añade al historial cuando hay una HORA DE SALIDA.
-                    // Por lo tanto, el filtro de "INGRESO" como acción es menos útil aquí a menos que cambies el registro.
-                    // Para simplificar, "INGRESO" significa que fue un registro completo, y "SALIDA" es liberado a tiempo.
-                    if (filterAction === "INGRESO" && visita.estado !== "LIBERADO A TIEMPO" && visita.estado !== "EXPIRADO") match = false;
-                }
-                return match;
-            });
+            // No aplicar filtros de fecha/conserje si la búsqueda está activa para mostrar todos los resultados de la búsqueda
+            if (!busquedaActiva) {
+                registrosParaMostrar = registrosParaMostrar.filter(visita => {
+                    let match = true;
+                    if (filterDate && visita.fecha !== filterDate) {
+                        match = false;
+                    }
+                    if (filterConserje && (visita.ingresadoPor || '').toUpperCase() !== filterConserje.toUpperCase()) {
+                        match = false;
+                    }
+                    if (filterAction) {
+                        if (filterAction === "SALIDA" && visita.estado !== "LIBERADO A TIEMPO") match = false;
+                        if (filterAction === "EXPIRADO" && visita.estado !== "EXPIRADO") match = false;
+                        if (filterAction === "INGRESO") {
+                             // "INGRESO" representa una visita completa (no hay ingresos a medio registrar en el historial)
+                             if (visita.estado !== "LIBERADO A TIEMPO" && visita.estado !== "EXPIRADO") match = false;
+                        }
+                    }
+                    return match;
+                });
+            }
 
-
-            [...filteredRecords].reverse().forEach(visita => { // Muestra los más recientes primero
+            [...registrosParaMostrar].reverse().forEach(visita => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${visita.estacionamiento}</td>
@@ -1496,8 +1514,11 @@
                 tbody.appendChild(tr);
             });
 
-            if (filteredRecords.length === 0 && document.getElementById('historial').classList.contains('active')) {
-                tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: var(--text-color);">NO SE ENCONTRARON REGISTROS CON LOS FILTROS APLICADOS.</td></tr>';
+            if (registrosParaMostrar.length === 0) {
+                const mensaje = busquedaActiva 
+                    ? 'NO SE ENCONTRARON REGISTROS EN EL HISTORIAL CON ESTE CRITERIO.'
+                    : 'NO HAY REGISTROS CON LOS FILTROS APLICADOS.';
+                tbody.innerHTML = `<tr><td colspan="13" style="text-align: center; color: var(--text-color);">${mensaje}</td></tr>`;
             }
         }
 
@@ -1509,7 +1530,6 @@
                     conserjes.add(visita.ingresadoPor.toUpperCase());
                 }
             });
-            // Limpiar opciones existentes (excepto "TODOS")
             selectConserje.querySelectorAll('option:not([value=""])').forEach(option => option.remove());
             
             Array.from(conserjes).sort().forEach(conserje => {
@@ -1521,7 +1541,8 @@
         }
 
         function aplicarFiltrosHistorial() {
-            // Actualizar la tabla con los filtros
+            busquedaActiva = false; // Aplicar filtros cancela la búsqueda activa
+            document.getElementById('searchInput').value = '';
             actualizarTablaHistorial();
         }
 
@@ -1529,13 +1550,13 @@
             document.getElementById('filterDate').value = '';
             document.getElementById('filterConserje').value = '';
             document.getElementById('filterAction').value = '';
-            actualizarTablaHistorial();
+            aplicarFiltrosHistorial(); // Refrescar la tabla
             mostrarToast("FILTROS DEL HISTORIAL REINICIADOS.", 'var(--light-color)');
         }
 
         function exportarPDFHistorialFiltrado() {
             const table = document.getElementById('registroVisitasTable');
-            const head = Array.from(table.querySelector('thead th')).map(th => th.textContent.trim());
+            const head = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
             const body = Array.from(table.querySelector('tbody').rows).map(row => Array.from(row.cells).map(cell => cell.textContent.trim()));
 
             if (body.length === 0 || (body.length === 1 && body[0][0].includes("NO SE ENCONTRARON REGISTROS"))) {
@@ -1548,28 +1569,21 @@
         }
 
         function calcularEstadisticas() {
-            const hoy = new Date();
-            hoy.setHours(0, 0, 0, 0); // Inicio del día
-            const ayer = new Date(hoy);
-            ayer.setDate(hoy.getDate() - 1);
+            // Eliminar los gráficos anteriores si existen
+            if (dailyOccupancyChart) dailyOccupancyChart.destroy();
+            if (avgStayTimeChart) avgStayTimeChart.destroy();
 
             // Promedio diario de ocupación
             const ocupacionesPorDia = {};
             registroVisitas.forEach(visita => {
-                if (visita.horaIngreso) {
-                    const fechaIngreso = visita.fecha; // Ya está en YYYY-MM-DD
-                    ocupacionesPorDia[fechaIngreso] = (ocupacionesPorDia[fechaIngreso] || 0) + 1;
+                if (visita.fecha) {
+                    ocupacionesPorDia[visita.fecha] = (ocupacionesPorDia[visita.fecha] || 0) + 1;
                 }
             });
 
             const fechas = Object.keys(ocupacionesPorDia).sort();
             const ocupaciones = fechas.map(f => ocupacionesPorDia[f]);
-
-            // Eliminar los gráficos anteriores si existen
-            if (dailyOccupancyChart) dailyOccupancyChart.destroy();
-            if (avgStayTimeChart) avgStayTimeChart.destroy();
-
-            // Gráfico de Promedio Diario de Ocupación
+            
             const dailyOccupancyCtx = document.getElementById('dailyOccupancyChart').getContext('2d');
             dailyOccupancyChart = new Chart(dailyOccupancyCtx, {
                 type: 'line',
@@ -1584,29 +1598,10 @@
                         tension: 0.3
                     }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') }
-                        },
-                        x: {
-                            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: getComputedStyle(document.body).getPropertyValue('--text-color')
-                            }
-                        }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color'), stepSize: 1 } }, x: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } } }, plugins: { legend: { labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } } } }
             });
 
-            // Tiempo promedio de permanencia por vehículo
+            // Tiempo promedio de permanencia
             let totalTiempoSegundos = 0;
             let countVisitasCompletas = 0;
             registroVisitas.forEach(visita => {
@@ -1623,85 +1618,38 @@
             const promedioTiempoSegundos = countVisitasCompletas > 0 ? totalTiempoSegundos / countVisitasCompletas : 0;
             const promedioTiempoFormato = formatoTiempo(promedioTiempoSegundos);
             
-            // Gráfico de Tiempo Promedio de Permanencia
             const avgStayTimeCtx = document.getElementById('avgStayTimeChart').getContext('2d');
             avgStayTimeChart = new Chart(avgStayTimeCtx, {
                 type: 'bar',
                 data: {
                     labels: ['TIEMPO PROMEDIO'],
-                    datasets: [{
-                        label: `PROMEDIO: ${promedioTiempoFormato}`,
-                        data: [promedioTiempoSegundos / 3600], // Convertir a horas para la barra
-                        backgroundColor: 'var(--secondary-color)',
-                        borderColor: 'var(--secondary-color)',
-                        borderWidth: 1
-                    }]
+                    datasets: [{ label: `PROMEDIO: ${promedioTiempoFormato}`, data: [promedioTiempoSegundos / 3600], backgroundColor: 'var(--secondary-color)' }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'HORAS',
-                                color: getComputedStyle(document.body).getPropertyValue('--text-color')
-                            },
-                            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') }
-                        },
-                        x: {
-                            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') }
-                        }
-                    },
-                     plugins: {
-                        legend: {
-                            labels: {
-                                color: getComputedStyle(document.body).getPropertyValue('--text-color')
-                            }
-                        }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'HORAS', color: getComputedStyle(document.body).getPropertyValue('--text-color') }, ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } }, x: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } } }, plugins: { legend: { labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } } } }
             });
 
-            // Horas de congestión pico (Heatmap)
+            // Heatmap de congestión
             const ocupacionesPorHora = new Array(24).fill(0);
-            const totalRegistrosHora = new Array(24).fill(0); // Para calcular promedios
-
             registroVisitas.forEach(visita => {
                 if (visita.horaIngreso) {
-                    const horaIngresoDate = new Date(`2000-01-01T${visita.horaIngreso}`); // Usar fecha ficticia
-                    const hour = horaIngresoDate.getHours();
-                    ocupacionesPorHora[hour]++;
-                }
-                 if (visita.horaSalida) {
-                    const horaSalidaDate = new Date(`2000-01-01T${visita.horaSalida}`);
-                    const hour = horaSalidaDate.getHours();
-                    // También considerar las salidas para una visión más completa de la congestión
-                    // Esto puede ajustarse según la definición exacta de "congestión"
-                    ocupacionesPorHora[hour]++; 
+                    try { const hour = parseInt(visita.horaIngreso.split(':')[0]); ocupacionesPorHora[hour]++; } catch(e){}
                 }
             });
 
-            const maxOcupacionHora = Math.max(...ocupacionesPorHora);
+            const maxOcupacionHora = Math.max(...ocupacionesPorHora, 1); // Evitar división por cero
             const heatmapGrid = document.getElementById('congestionHeatmap');
-
-            // Limpiar celdas anteriores (excepto las etiquetas de horas)
-            Array.from(heatmapGrid.children).filter(child => !child.classList.contains('hour-label')).forEach(child => child.remove());
-
-            // Añadir celdas de datos
-            for (let i = 0; i < 24; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'heatmap-cell';
-                const count = ocupacionesPorHora[i];
-                let level = 0;
-                if (maxOcupacionHora > 0) {
-                    level = Math.min(6, Math.floor((count / maxOcupacionHora) * 6)); // Escala de 0 a 6
-                }
-                cell.classList.add(`level-${level}`);
-                cell.innerHTML = `${String(i).padStart(2, '0')}h <span class="count">${count}</span>`;
-                heatmapGrid.appendChild(cell);
+            
+            const cells = heatmapGrid.querySelectorAll('.heatmap-cell:not(.hour-label)');
+            if (cells.length === 0) { // Crear celdas si no existen
+                for (let i = 0; i < 24; i++) heatmapGrid.appendChild(document.createElement('div'));
             }
+
+            heatmapGrid.querySelectorAll('.heatmap-cell:not(.hour-label)').forEach((cell, i) => {
+                const count = ocupacionesPorHora[i];
+                let level = Math.min(6, Math.floor((count / maxOcupacionHora) * 6));
+                cell.className = `heatmap-cell level-${level}`;
+                cell.innerHTML = `<span class="count" title="${count} ingresos registrados">${count}</span>`;
+            });
         }
 
 
@@ -1712,19 +1660,7 @@
                 return;
             }
             const datosExportar = registroVisitas.map(v => ({
-                'N° EST.': v.estacionamiento,
-                'NOMBRE': (v.nombre || '').toUpperCase(),
-                'RUT': (v.rut || '').toUpperCase(),
-                'PATENTE': (v.patente || '').toUpperCase(),
-                'UNIDAD': (v.unidad || '').toUpperCase(),
-                'INGRESADO POR': (v.ingresadoPor || '').toUpperCase(),
-                'H. INGRESO': v.horaIngreso,
-                'H. SALIDA': v.horaSalida,
-                'T. TOTAL': v.tiempoTotal,
-                'ING. CF': v.ingresadoCF ? 'SÍ' : 'NO',
-                'NOTIF. RESID.': v.notificadoResidente ? 'SÍ' : 'NO',
-                'ESTADO': (v.estado || '').toUpperCase(),
-                'FECHA': v.fecha || '-'
+                'N° EST.': v.estacionamiento, 'NOMBRE': (v.nombre || '').toUpperCase(), 'RUT': (v.rut || '').toUpperCase(), 'PATENTE': (v.patente || '').toUpperCase(), 'UNIDAD': (v.unidad || '').toUpperCase(), 'INGRESADO POR': (v.ingresadoPor || '').toUpperCase(), 'H. INGRESO': v.horaIngreso, 'H. SALIDA': v.horaSalida, 'T. TOTAL': v.tiempoTotal, 'ING. CF': v.ingresadoCF ? 'SÍ' : 'NO', 'NOTIF. RESID.': v.notificadoResidente ? 'SÍ' : 'NO', 'ESTADO': (v.estado || '').toUpperCase(), 'FECHA': v.fecha || '-'
             }));
             const worksheet = XLSX.utils.json_to_sheet(datosExportar);
             const workbook = XLSX.utils.book_new();
@@ -1750,25 +1686,10 @@
             doc.autoTable({
                 head: [head.map(h => h.toUpperCase())],
                 body: bodyDataProcessed,
-                startY: 25,
-                theme: 'grid',
+                startY: 25, theme: 'grid',
                 headStyles: { fillColor: [52, 152, 219], textColor: [255,255,255], fontStyle: 'bold' },
                 styles: { fontSize: 6, cellPadding: 1, overflow: 'linebreak' },
-                columnStyles: { 
-                    0: { cellWidth: 12 }, 
-                    1: { cellWidth: 28 }, 
-                    2: { cellWidth: 18 }, 
-                    3: { cellWidth: 18 }, 
-                    4: { cellWidth: 18 }, 
-                    5: { cellWidth: 22 }, 
-                    6: { cellWidth: 20 }, 
-                    7: { cellWidth: 20 }, 
-                    8: { cellWidth: 18 }, 
-                    9: { cellWidth: 10 }, 
-                    10: { cellWidth: 10 }, 
-                    11: { cellWidth: 18 },
-                    12: { cellWidth: 18 } 
-                } 
+                columnStyles: { 0: { cellWidth: 12 }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 18 }, 3: { cellWidth: 18 }, 4: { cellWidth: 18 }, 5: { cellWidth: 'auto' }, 6: { cellWidth: 18 }, 7: { cellWidth: 18 }, 8: { cellWidth: 18 }, 9: { cellWidth: 10 }, 10: { cellWidth: 12 }, 11: { cellWidth: 20 }, 12: { cellWidth: 18 } } 
             });
             doc.save(`${nombreArchivo.toUpperCase()}_${fechaFormatoArchivo()}.pdf`);
         }
@@ -1779,11 +1700,7 @@
                 return;
             }
             const head = ['N° EST.', 'NOMBRE', 'RUT', 'PATENTE', 'UNIDAD', 'INGRESADO POR', 'H. ING.', 'H. SAL.', 'T. TOTAL', 'CF', 'NOTIF.', 'ESTADO', 'FECHA'];
-            const body = registroVisitas.map(v => [
-                v.estacionamiento, v.nombre, v.rut, v.patente, v.unidad, v.ingresadoPor,
-                v.horaIngreso, v.horaSalida, v.tiempoTotal, 
-                v.ingresadoCF, v.notificadoResidente, v.estado, v.fecha
-            ]);
+            const body = registroVisitas.map(v => [ v.estacionamiento, v.nombre, v.rut, v.patente, v.unidad, v.ingresadoPor, v.horaIngreso, v.horaSalida, v.tiempoTotal, v.ingresadoCF, v.notificadoResidente, v.estado, v.fecha ]);
             generarPDF('HISTORIAL DE USO DE ESTACIONAMIENTOS', head, body, 'HISTORIAL_ESTACIONAMIENTOS');
             mostrarToast("HISTORIAL EXPORTADO A PDF.", 'var(--secondary-color)');
         }
@@ -1796,18 +1713,7 @@
             }
 
             const head = ['N° EST.', 'NOMBRE', 'RUT', 'PATENTE', 'UNIDAD', 'INGRESADO POR', 'H. ING.', 'T. REST.', 'CF', 'NOTIF.'];
-            const body = ocupados.map(est => [
-                est.id,
-                est.datosVehiculo.nombre,
-                est.datosVehiculo.rut,
-                est.datosVehiculo.patente,
-                est.datosVehiculo.unidad,
-                est.datosVehiculo.ingresadoPor,
-                est.datosVehiculo.horaIngresoDisplay,
-                formatoTiempo(est.tiempoRestanteSegundos),
-                est.datosVehiculo.ingresadoCF,
-                est.datosVehiculo.notificadoResidente
-            ]);
+            const body = ocupados.map(est => [ est.id, est.datosVehiculo.nombre, est.datosVehiculo.rut, est.datosVehiculo.patente, est.datosVehiculo.unidad, est.datosVehiculo.ingresadoPor, est.datosVehiculo.horaIngresoDisplay, formatoTiempo(est.tiempoRestanteSegundos), est.datosVehiculo.ingresadoCF, est.datosVehiculo.notificadoResidente ]);
             
             const titulo = 'INFORME DE ESTACIONAMIENTOS EN USO - CUMBRES DE QUILPUÉ';
             const nombreArchivo = 'USO_ACTUAL_ESTACIONAMIENTOS';
@@ -1815,34 +1721,11 @@
             if (forEmail) { 
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: 'landscape' });
-                doc.setFontSize(14);
-                doc.text(titulo.toUpperCase(), 14, 15);
-                doc.setFontSize(8);
-                doc.text(`GENERADO: ${new Date().toLocaleString('es-CL')}`, 14, 21);
-
-                const bodyDataProcessed = body.map(row => row.map(cell => {
-                     if (typeof cell === 'boolean') return cell ? 'SÍ' : 'NO';
-                     return (cell === null || typeof cell === 'undefined') ? '' : String(cell).toUpperCase();
-                }));
-
+                doc.setFontSize(14); doc.text(titulo.toUpperCase(), 14, 15);
+                doc.setFontSize(8); doc.text(`GENERADO: ${new Date().toLocaleString('es-CL')}`, 14, 21);
+                const bodyDataProcessed = body.map(row => row.map(cell => (typeof cell === 'boolean' ? (cell ? 'SÍ' : 'NO') : String(cell || '').toUpperCase())));
                 if (ocupados.length > 0) {
-                    doc.autoTable({
-                        head: [head.map(h => h.toUpperCase())], body: bodyDataProcessed, startY: 25, theme: 'grid',
-                        headStyles: { fillColor: [52, 152, 219], textColor: [255,255,255], fontStyle: 'bold' },
-                        styles: { fontSize: 6, cellPadding: 1, overflow: 'linebreak' },
-                        columnStyles: { 
-                            0: { cellWidth: 12 }, 
-                            1: { cellWidth: 30 }, 
-                            2: { cellWidth: 20 }, 
-                            3: { cellWidth: 20 }, 
-                            4: { cellWidth: 20 }, 
-                            5: { cellWidth: 25 }, 
-                            6: { cellWidth: 22 }, 
-                            7: { cellWidth: 20 }, 
-                            8: { cellWidth: 10 }, 
-                            9: { cellWidth: 12 }
-                        } 
-                    });
+                    doc.autoTable({ head: [head.map(h => h.toUpperCase())], body: bodyDataProcessed, startY: 25, theme: 'grid', headStyles: { fillColor: [52, 152, 219], textColor: [255,255,255], fontStyle: 'bold' }, styles: { fontSize: 7, cellPadding: 1.5, overflow: 'linebreak' }, columnStyles: { 0: { cellWidth: 12 }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 20 }, 3: { cellWidth: 20 }, 4: { cellWidth: 20 }, 5: { cellWidth: 'auto' }, 6: { cellWidth: 22 }, 7: { cellWidth: 20 }, 8: { cellWidth: 10 }, 9: { cellWidth: 12 } } });
                 } else {
                      doc.text("NO HAY ESTACIONAMIENTOS EN USO EN ESTE MOMENTO.", 14, 35);
                 }
@@ -1854,44 +1737,22 @@
             }
         }
 
-        // --- NOTIFICACIÓN A LA ADMINISTRACIÓN (NUEVO) ---
+        // --- NOTIFICACIÓN A LA ADMINISTRACIÓN ---
         function notificarAdministracion() {
-            mostrarToast("GENERANDO PDF para la administración...", 'var(--primary-color)');
-            const pdfDoc = exportarPDFActual(true); // Generar PDF para el envío
-
+            mostrarToast("GENERANDO PDF PARA LA ADMINISTRACIÓN...", 'var(--primary-color)');
+            const pdfDoc = exportarPDFActual(true); 
             if (pdfDoc) {
-                // Generar un Data URI para el PDF (simula adjunto)
-                const pdfDataUri = pdfDoc.output('datauristring');
-
-                // Enviar correo (esto es una simulación en el frontend)
-                // En un entorno de producción real, necesitarías un backend para enviar correos.
-                // Aquí, abrimos el cliente de correo por defecto con el PDF codificado en el cuerpo (limitado por tamaño y cliente).
-                // Una solución robusta implicaría enviar el PDF a un servidor que lo adjunte y envíe.
-
                 const subject = encodeURIComponent("INFORME DIARIO DE ESTACIONAMIENTOS EN USO - CUMBRES DE QUILPUÉ");
-                const body = encodeURIComponent(
-                    "Estimados,\n\n" +
-                    "Adjunto encontrarán el informe actual de los estacionamientos en uso. " +
-                    "Este informe incluye detalles de los vehículos y tiempos de ocupación.\n\n" +
-                    "Saludos cordiales,\n" +
-                    "Sistema de Control de Estacionamientos\n\n" +
-                    "NOTA: El PDF se ha intentado adjuntar o se ha codificado en el cuerpo del mensaje si es pequeño. Para archivos grandes, esto podría no funcionar en todos los clientes de correo."
-                );
-
-                // Enlace mailto con los destinatarios y el asunto
-                // Intentar incrustar el PDF como un data URI, aunque esto solo funciona en algunos clientes de correo para PDFs muy pequeños.
-                // Para una solución robusta, se requiere un servidor.
-                const mailtoLink = `mailto:${CORREO_DESTINO_1};${CORREO_DESTINO_2}?subject=${subject}&body=${body}`; // &attach=${pdfDataUri} (esto no funciona directamente en mailto para adjuntos grandes)
-                
+                const body = encodeURIComponent("Estimados,\n\nSe adjunta el informe actual de los estacionamientos en uso.\n\nSaludos cordiales,\nSistema de Control de Estacionamientos");
+                const mailtoLink = `mailto:${CORREO_DESTINO_1};${CORREO_DESTINO_2}?subject=${subject}&body=${body}`;
                 window.location.href = mailtoLink;
-                mostrarToast("ABRIENDO CLIENTE DE CORREO PARA NOTIFICAR A LA ADMINISTRACIÓN. POR FAVOR, CONFIRME EL ENVÍO.", 'var(--secondary-color)', 7000);
+                mostrarToast("ABRIENDO CLIENTE DE CORREO. CONFIRME EL ENVÍO.", 'var(--secondary-color)', 7000);
             } else {
-                mostrarToast("NO HAY DATOS PARA ENVIAR A LA ADMINISTRACIÓN.", 'var(--warning-color)');
+                mostrarToast("NO HAY DATOS PARA ENVIAR.", 'var(--warning-color)');
             }
         }
 
-
-        // --- FUNCIONES DE BÚSQUEDA ---
+        // --- FUNCIONES DE BÚSQUEDA (MEJORADO) ---
         function manejarBusqueda(event) {
             if (event.key === 'Enter') {
                 ejecutarBusqueda();
@@ -1928,19 +1789,19 @@
                 }
             });
 
-            // Si la búsqueda se activa, actualizar la pestaña activa con los resultados
-            const activeTabId = document.querySelector('.tab.active').dataset.tabId;
-            if (activeTabId === 'en-uso') {
-                actualizarDisplayEstacionamientos();
-            } else if (activeTabId === 'historial') {
-                actualizarTablaHistorial();
-            } else if (activeTabId === 'estadisticas') {
-                // Las estadísticas no se filtran por búsqueda directa, se re-renderizan normalmente
-                calcularEstadisticas();
-            }
+            // Desactivar filtros de historial para no interferir con la búsqueda
+            resetearFiltrosHistorial();
+            busquedaActiva = true; // resetearFiltros lo pone en false, lo reactivamos
+
+            // Actualizar ambas vistas para reflejar la búsqueda global
+            actualizarDisplayEstacionamientos();
+            actualizarTablaHistorial();
             
-            if (resultadosBusqueda.length > 0) {
-                mostrarToast(`BÚSQUEDA COMPLETA. ${resultadosBusqueda.length} RESULTADOS ENCONTRADOS.`, 'var(--secondary-color)');
+            const enUsoCount = resultadosBusqueda.filter(r => r.type === 'estacionamiento').length;
+            const historialCount = resultadosBusqueda.filter(r => r.type === 'historial').length;
+            
+            if (enUsoCount + historialCount > 0) {
+                mostrarToast(`BÚSQUEDA: ${enUsoCount} EN USO, ${historialCount} EN HISTORIAL.`, 'var(--secondary-color)');
             } else {
                 mostrarToast("NO SE ENCONTRARON RESULTADOS.", 'var(--warning-color)');
             }
@@ -1950,13 +1811,10 @@
             document.getElementById('searchInput').value = '';
             busquedaActiva = false;
             resultadosBusqueda = [];
-            // Resetear filtros de historial también
-            document.getElementById('filterDate').value = '';
-            document.getElementById('filterConserje').value = '';
-            document.getElementById('filterAction').value = '';
+            
+            resetearFiltrosHistorial(); // Esto ya actualiza la tabla del historial a su estado sin filtros
+            actualizarDisplayEstacionamientos(); // Actualizamos la vista de estacionamientos
 
-            actualizarDisplayEstacionamientos();
-            actualizarTablaHistorial(); // Esto ahora tendrá en cuenta los filtros si se reestablecen
             mostrarToast("BÚSQUEDA Y FILTROS REINICIADOS.", 'var(--light-color)');
         }
 
@@ -1981,22 +1839,22 @@
             document.getElementById(tabId).classList.add('active');
             if (element) element.classList.add('active'); 
             
-            // Re-renderizar contenido al cambiar de pestaña
-            if (tabId === 'en-uso') {
-                actualizarDisplayEstacionamientos();
+            if (tabId === 'estadisticas') {
+                calcularEstadisticas();
             } else if (tabId === 'historial') {
-                llenarFiltroConserjes(); // Asegurar que el filtro de conserjes esté actualizado
-                actualizarTablaHistorial();
-            } else if (tabId === 'estadisticas') {
-                calcularEstadisticas(); // Calcular y mostrar gráficos
+                llenarFiltroConserjes();
             }
-            // Resetear búsqueda si la pestaña no es la misma que la búsqueda o si no hay búsqueda activa
-            if (!busquedaActiva && document.getElementById('searchInput').value !== '') {
-                document.getElementById('searchInput').value = '';
+
+            // Las vistas de 'en-uso' e 'historial' ya se actualizan con la búsqueda,
+            // por lo que no es necesario volver a renderizar todo al cambiar de pestaña
+            // a menos que la búsqueda esté inactiva.
+            if (!busquedaActiva) {
+                 if (tabId === 'en-uso') actualizarDisplayEstacionamientos();
+                 if (tabId === 'historial') actualizarTablaHistorial();
             }
         }
 
-        function mostrarToast(mensaje, bgColor = 'var(--dark-color)', duracion = 3000) {
+        function mostrarToast(mensaje, bgColor = 'var(--dark-color)', duracion = 3500) {
             const toast = document.getElementById('toast');
             toast.textContent = mensaje.toUpperCase();
             toast.style.backgroundColor = bgColor;
@@ -2006,61 +1864,45 @@
             }, duracion);
         }
 
-        // --- MODO OSCURO (NUEVO) ---
+        // --- MODO OSCURO ---
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const isDarkMode = document.body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', isDarkMode);
-            // Actualizar el texto del botón y el icono
             const darkModeToggle = document.getElementById('darkModeToggle');
-            if (isDarkMode) {
-                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i> MODO CLARO';
-            } else {
-                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i> MODO OSCURO';
-            }
-            // Si estás en la pestaña de estadísticas, refrescar gráficos para colores de texto
+            darkModeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i> MODO CLARO' : '<i class="fas fa-moon"></i> MODO OSCURO';
+            
             if (document.getElementById('estadisticas').classList.contains('active')) {
                 calcularEstadisticas();
             }
         }
 
         function cargarPreferenciaModoOscuro() {
-            const savedMode = localStorage.getItem('darkMode');
-            if (savedMode === 'true') {
+            if (localStorage.getItem('darkMode') === 'true') {
                 document.body.classList.add('dark-mode');
                 document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun"></i> MODO CLARO';
-            } else {
-                document.body.classList.remove('dark-mode');
-                document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-moon"></i> MODO OSCURO';
             }
         }
 
-
-        // --- "ENVÍO AUTOMÁTICO DE CORREO" (SIMULACIÓN/PREPARACIÓN) ---
+        // --- "ENVÍO AUTOMÁTICO DE CORREO" ---
         function configurarRevisionAutomaticaEmail() {
             setInterval(() => {
                 const ahora = new Date();
                 const hora = ahora.getHours();
                 const minutos = ahora.getMinutes();
-
                 if ((hora === 11 && minutos === 0) || (hora === 23 && minutos === 0)) {
-                    console.log(`PREPARANDO INFORME PARA ENVÍO A LAS ${String(hora).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`);
                     prepararYSimularEnvioEmail();
                 }
             }, 60 * 1000); 
         }
 
         function prepararYSimularEnvioEmail() {
-            mostrarToast("GENERANDO INFORME PDF PARA ENVÍO PROGRAMADO...", 'var(--primary-color)');
+            mostrarToast("GENERANDO INFORME PROGRAMADO...", 'var(--primary-color)');
             const pdfDoc = exportarPDFActual(true); 
-
             if (pdfDoc) {
-                const pdfDataUri = pdfDoc.output('datauristring'); 
                 console.log(`PDF GENERADO PARA ENVIAR A ${CORREO_DESTINO_1} Y ${CORREO_DESTINO_2}`);
-                console.log("DATA URI DEL PDF (PARA DEMOSTRACIÓN):", pdfDataUri.substring(0,100) + "..."); 
-                mostrarToast(`INFORME PDF PREPARADO. EN UN SISTEMA REAL, SE ENVIARÍA A ${CORREO_DESTINO_1} Y ${CORREO_DESTINO_2}.`, 'var(--secondary-color)', 7000);
+                mostrarToast(`INFORME PREPARADO. EN UN SISTEMA REAL, SE ENVIARÍA AHORA.`, 'var(--secondary-color)', 7000);
             } else {
-                mostrarToast("NO SE GENERÓ PDF PARA EL ENVÍO PROGRAMADO (POSIBLEMENTE NO HAY DATOS).", 'var(--warning-color)');
                 console.log(`INFORME PARA ${CORREO_DESTINO_1} Y ${CORREO_DESTINO_2}: NO HAY VEHÍCULOS ESTACIONADOS.`);
             }
         }
