@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Estacionamientos Avanzado v5 - Cumbres de Quilpué</title>
+    <title>Control Estacionamientos Avanzado v4 - Cumbres de Quilpué</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -66,8 +65,7 @@
         body.dark-mode .modal-content {
             background-color: var(--card-background);
         }
-        body.dark-mode .modal-content input[type="text"],
-        body.dark-mode .modal-content input[type="date"] { /* AÑADIDO */
+        body.dark-mode .modal-content input[type="text"] {
             background-color: var(--light-color);
             color: var(--text-color);
             border-color: #555;
@@ -87,17 +85,6 @@
             color: #bbb;
         }
 
-        /* --- Animación de Parpadeo (NUEVO) --- */
-        @keyframes flash-red {
-            0%, 100% {
-                background-color: var(--danger-color);
-                color: white;
-            }
-            50% {
-                background-color: var(--card-background);
-                color: var(--text-color);
-            }
-        }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -107,14 +94,9 @@
             padding: 20px;
             line-height: 1.6;
             text-transform: uppercase;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            display: flex; /* Flex para el footer */
-            flex-direction: column; /* Apilar contenido y footer */
-            min-height: 100vh; /* Ocupar toda la altura */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Transición para modo oscuro */
         }
-        .container-fluid {
-            flex: 1; /* Permitir que el contenedor principal crezca */
-        }
+
         input, textarea, select, button {
             text-transform: uppercase;
         }
@@ -123,9 +105,17 @@
           opacity: 1;
           text-transform: none;
         }
+        :-ms-input-placeholder {
+          color: #999;
+          text-transform: none;
+        }
+        ::-ms-input-placeholder {
+          color: #999;
+          text-transform: none;
+        }
 
         .container-fluid {
-            max-width: 1400px; /* Ancho aumentado para más estadísticas */
+            max-width: 1300px;
             margin: 0 auto;
             padding: 15px;
         }
@@ -145,18 +135,19 @@
             font-weight: 600;
         }
 
+        /* --- Paneles Superiores (NUEVO) --- */
         .summary-panels {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 30px; /* Más espacio entre las tarjetas */
             margin-bottom: 30px;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Adaptabilidad */
         }
 
         .summary-card {
             background-color: var(--card-background);
-            border-radius: 50%;
-            width: 150px;
+            border-radius: 50%; /* Circular */
+            width: 150px; /* Tamaño del círculo */
             height: 150px;
             display: flex;
             flex-direction: column;
@@ -165,23 +156,40 @@
             box-shadow: var(--box-shadow);
             text-align: center;
             font-weight: 600;
-            color: white;
+            color: white; /* Texto blanco para contraste */
             transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            position: relative; /* Para el icono */
+            overflow: hidden; /* Asegurar que nada se salga del círculo */
         }
 
         .summary-card:hover {
-            transform: translateY(-8px) scale(1.05);
+            transform: translateY(-8px) scale(1.05); /* Animación al pasar el ratón */
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
-        .summary-card .icon { font-size: 3em; margin-bottom: 5px; line-height: 1; }
-        .summary-card .value { font-size: 2.2em; line-height: 1; margin: 0; }
-        .summary-card .label { font-size: 0.9em; margin-top: 5px; font-weight: 500; }
+        .summary-card .icon {
+            font-size: 3em;
+            margin-bottom: 5px;
+            line-height: 1; /* Alineación del icono */
+        }
+
+        .summary-card .value {
+            font-size: 2.2em; /* Tamaño del número */
+            line-height: 1;
+            margin: 0;
+        }
+
+        .summary-card .label {
+            font-size: 0.9em; /* Tamaño del texto */
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* Colores específicos para cada tarjeta */
         .summary-card.total { background-color: var(--total-card-color); }
         .summary-card.available { background-color: var(--available-card-color); }
         .summary-card.occupied { background-color: var(--occupied-card-color); }
+
 
         .actions-bar {
             display: flex;
@@ -194,7 +202,7 @@
             background-color: var(--card-background);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease; /* Transición para modo oscuro */
         }
 
         .actions-bar button, .actions-bar input[type="text"] {
@@ -223,10 +231,10 @@
         .dropdown-content {
             display: none;
             position: absolute;
-            background-color: var(--card-background);
-            min-width: 220px;
+            background-color: var(--card-background); /* Fondo de dropdown adaptado a modo oscuro */
+            min-width: 220px; /* Ancho ajustado */
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 100;
+            z-index: 100; /* Z-index alto para estar por encima de otros elementos */
             border-radius: var(--border-radius);
             top: 100%;
             left: 0;
@@ -234,7 +242,7 @@
         }
 
         .dropdown-content button {
-            color: var(--text-color);
+            color: var(--text-color); /* Color de texto adaptado a modo oscuro */
             padding: 12px 16px;
             text-decoration: none;
             display: block;
@@ -246,7 +254,7 @@
         }
 
         .dropdown-content button:hover {
-            background-color: var(--light-color);
+            background-color: var(--light-color); /* Fondo de hover adaptado a modo oscuro */
             transform: none;
         }
 
@@ -254,13 +262,14 @@
             display: block;
         }
 
+        /* --- Botón SOS Flotante (NUEVO) --- */
         .btn-sos-flotante {
             position: fixed;
-            top: 20px;
+            top: 20px; /* Esquina superior derecha */
             right: 20px;
             background-color: var(--danger-color);
             color: white;
-            border-radius: 50%;
+            border-radius: 50%; /* Circular */
             width: 50px;
             height: 50px;
             display: flex;
@@ -268,7 +277,7 @@
             align-items: center;
             font-size: 1.5rem;
             box-shadow: var(--box-shadow);
-            z-index: 1001;
+            z-index: 1001; /* Mayor que modales */
             cursor: pointer;
             transition: transform 0.3s ease, background-color 0.3s ease;
         }
@@ -277,6 +286,7 @@
             background-color: #c0392b;
         }
 
+        /* --- Botón Modo Oscuro (NUEVO) --- */
         #darkModeToggle {
             background-color: #6a737d;
             color: white;
@@ -290,24 +300,25 @@
             transform: translateY(-2px);
         }
 
+
+        /* --- Mejora visual de búsqueda (NUEVO) --- */
         .search-container {
             display: flex;
             gap: 10px;
             flex-grow: 1;
-            max-width: 450px;
+            max-width: 450px; /* Aumentado el ancho para mejor legibilidad */
         }
-        /* CORRECCIÓN: Selector más específico para el input de búsqueda */
-        .actions-bar .search-container input {
+        .search-container input {
             flex-grow: 1;
-            border: 1px solid var(--search-border-color);
-            color: var(--text-color) !important; /* !important para asegurar la sobreescritura */
-            background-color: var(--card-background);
-            padding: 10px 12px;
-            font-size: 1rem;
+            border: 1px solid var(--search-border-color); /* Borde con contraste */
+            color: var(--text-color);
+            background-color: var(--light-color); /* Fondo para contraste */
+            padding: 10px 12px; /* Mejor padding */
+            font-size: 1rem; /* Tamaño de fuente más legible */
         }
         .search-container input:focus {
             outline: none;
-            border-color: var(--primary-color);
+            border-color: var(--primary-color); /* Borde al enfocar */
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
         }
         .search-container button {
@@ -317,6 +328,7 @@
             background-color: #27ae60;
         }
 
+
         .tabs {
             display: flex;
             margin-bottom: 20px;
@@ -324,7 +336,7 @@
             border-radius: var(--border-radius) var(--border-radius) 0 0;
             overflow: hidden;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease; /* Transición para modo oscuro */
         }
 
         .tab {
@@ -333,7 +345,7 @@
             background-color: var(--light-color);
             color: var(--dark-color);
             border-bottom: 3px solid transparent;
-            transition: background-color 0.3s, border-color 0.3s, color 0.3s ease;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s ease; /* Transición para modo oscuro */
             font-weight: 500;
             flex-grow: 1;
             text-align: center;
@@ -359,7 +371,7 @@
             background-color: var(--card-background);
             border-radius: 0 0 var(--border-radius) var(--border-radius);
             box-shadow: var(--box-shadow);
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease; /* Transición para modo oscuro */
         }
 
         .tab-content.active {
@@ -380,21 +392,8 @@
             text-align: center;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease; /* Transición para modo oscuro */
             position: relative;
-        }
-        /* NUEVO: Clase para parpadeo de expiración */
-        .parking-spot.expired-flash {
-            animation: flash-red 1.5s infinite ease-in-out;
-        }
-        .parking-spot.expired-flash h3,
-        .parking-spot.expired-flash .spot-info,
-        .parking-spot.expired-flash .timer {
-             animation: flash-text-color 1.5s infinite ease-in-out;
-        }
-        @keyframes flash-text-color {
-            0%, 100% { color: white; }
-            50% { color: var(--text-color); }
         }
 
         .parking-spot:hover {
@@ -413,40 +412,144 @@
             font-size: 2.5rem;
             margin-bottom: 10px;
         }
-        .parking-spot.disponible { border-left: 5px solid var(--secondary-color); }
+
+        .parking-spot.disponible {
+            border-left: 5px solid var(--secondary-color);
+        }
         .parking-spot.disponible .status-icon { color: var(--secondary-color); }
-        .parking-spot.ocupado { border-left: 5px solid var(--danger-color); }
+
+        .parking-spot.ocupado {
+            border-left: 5px solid var(--danger-color);
+        }
         .parking-spot.ocupado .status-icon { color: var(--danger-color); }
+
         .parking-spot.discapacitados {
             border-left: 5px solid var(--discapacitados-color);
             background-color: #e0f2f7;
         }
-        body.dark-mode .parking-spot.discapacitados { background-color: #3b5066; }
-        .parking-spot.discapacitados .status-icon { color: var(--discapacitados-color); }
-        .parking-spot .timer { font-size: 1rem; font-weight: 500; color: var(--dark-color); }
-        .parking-spot .spot-info { font-size: 0.85rem; color: #7f8c8d; margin-top: 5px; word-break: break-all; }
-        .warning-icon { color: var(--warning-color); font-size: 1.2em; position: absolute; top: 10px; right: 10px; }
-        .time-expired-warning { color: var(--danger-color); font-weight: bold; }
+        body.dark-mode .parking-spot.discapacitados {
+            background-color: #3b5066; /* Fondo más oscuro para discapacitados en modo oscuro */
+        }
+        .parking-spot.discapacitados .status-icon {
+            color: var(--discapacitados-color);
+        }
 
+
+        .parking-spot .timer {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        .parking-spot .spot-info {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        .warning-icon {
+            color: var(--warning-color);
+            font-size: 1.2em;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .time-expired-warning {
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+
+        /* Modal Styles */
         .modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center;
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
         }
+
         .modal-content {
-            background-color: var(--card-background); margin: auto; padding: 30px; border-radius: var(--border-radius); box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2); width: 90%; max-width: 550px; animation: fadeInModal 0.3s ease-out; transition: background-color 0.3s ease;
+            background-color: var(--card-background);
+            margin: auto;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 550px;
+            animation: fadeInModal 0.3s ease-out;
+            transition: background-color 0.3s ease; /* Transición para modo oscuro */
         }
-        @keyframes fadeInModal { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        .modal-content h2 { margin-top: 0; color: var(--primary-color); font-weight: 600; margin-bottom: 20px; }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
         .modal-content p { margin: 10px 0; font-size: 1rem; color: var(--text-color); }
         .modal-content strong { font-weight: 500; }
-        .modal-content label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--dark-color); }
-        .modal-content input[type="text"], .modal-content input[type="date"] {
-            width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: var(--border-radius); font-size: 1rem; color: var(--text-color); background-color: var(--background-color); transition: background-color 0.3s ease, color 0.3s ease;
+
+        .modal-content label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
         }
-        .form-checkbox-group { margin-bottom: 15px; display: flex; align-items: center; }
-        .form-checkbox-group input[type="checkbox"] { margin-right: 10px; width: auto; height: 1.2em; cursor: pointer; }
-        .form-checkbox-group label { margin-bottom: 0; font-weight: normal; font-size: 0.95rem; cursor: pointer; }
-        .modal-buttons { margin-top: 25px; display: flex; justify-content: flex-end; gap: 10px; }
-        .modal-buttons button { padding: 10px 20px; font-size: 1rem; border: none; border-radius: var(--border-radius); cursor: pointer; transition: background-color 0.3s ease; }
+        .modal-content input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            color: var(--text-color); /* Color de texto del input */
+            background-color: var(--background-color); /* Fondo del input */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .form-checkbox-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .form-checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            width: auto;
+            height: 1.2em;
+            cursor: pointer;
+        }
+        .form-checkbox-group label {
+            margin-bottom: 0;
+            font-weight: normal;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .modal-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
         .modal-buttons .btn-primary { background-color: var(--primary-color); color: white; }
         .modal-buttons .btn-primary:hover { background-color: #2980b9; }
         .modal-buttons .btn-danger { background-color: var(--danger-color); color: white; }
@@ -454,163 +557,234 @@
         .modal-buttons .btn-secondary { background-color: #7f8c8d; color: white; }
         .modal-buttons .btn-secondary:hover { background-color: #6c7a89; }
 
-        .history-table-container { max-height: 500px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: var(--border-radius); transition: border-color 0.3s ease; }
-        table { width: 100%; border-collapse: collapse; background-color: var(--card-background); transition: background-color 0.3s ease; }
-        th, td { border: 1px solid #e0e0e0; padding: 10px 12px; text-align: left; font-size: 0.85rem; word-break: break-word; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-        body.dark-mode th, body.dark-mode td { border-color: #444; }
-        th { background-color: var(--primary-color); color: white; position: sticky; top: 0; z-index: 10; font-weight: 500; }
-        tbody tr:nth-child(even) { background-color: #f9f9f9; }
-        body.dark-mode tbody tr:nth-child(even) { background-color: #3d546a; }
-        tbody tr:hover { background-color: #e9ecef; }
-        body.dark-mode tbody tr:hover { background-color: #4a627d; }
-        tbody tr.expired-row { background-color: var(--warning-color); color: white; }
-        body.dark-mode tbody tr.expired-row { background-color: #d35400; }
 
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--dark-color); color: white; padding: 15px 25px; border-radius: var(--border-radius); box-shadow: var(--box-shadow); z-index: 2000; opacity: 0; transition: opacity 0.5s ease, bottom 0.5s ease, background-color 0.3s ease; font-size: 1rem; }
-        .toast.show { opacity: 1; bottom: 30px; }
-        .modal#customAlertModal .modal-content { max-width: 450px; border-left: 5px solid var(--danger-color); }
-        .modal#customAlertModal h2 { color: var(--danger-color); }
-        #customAlertMessage { font-size: 1.05rem; line-height: 1.5; margin-bottom: 20px; white-space: pre-line; }
+        .history-table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            transition: border-color 0.3s ease; /* Transición para modo oscuro */
+        }
 
-        .controls-container { /* Renombrado de history-controls para ser más genérico */
-            display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; padding: 15px; background-color: var(--card-background); border-radius: var(--border-radius); box-shadow: 0 2px 5px rgba(0,0,0,0.05); align-items: flex-end; transition: background-color 0.3s ease;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-background);
+            transition: background-color 0.3s ease; /* Transición para modo oscuro */
         }
-        .controls-container .control-group { flex-grow: 1; min-width: 150px; }
-        .controls-container label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--dark-color); font-size: 0.8rem; }
-        .controls-container input, .controls-container select {
-            width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: var(--border-radius); background-color: var(--background-color); color: var(--text-color); transition: background-color 0.3s ease, color 0.3s ease; box-sizing: border-box;
+
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 0.85rem;
+            word-break: break-word;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Transición para modo oscuro */
         }
-        body.dark-mode .controls-container input, body.dark-mode .controls-container select { background-color: var(--light-color); border-color: #555; }
-        .controls-container button {
-            background-color: var(--primary-color); color: white; padding: 8px 15px; border-radius: var(--border-radius); cursor: pointer; transition: background-color 0.3s ease; border: none;
+        body.dark-mode th, body.dark-mode td {
+            border-color: #444; /* Borde más oscuro en modo oscuro */
         }
-        .controls-container button:hover { background-color: #2980b9; }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-weight: 500;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        body.dark-mode tbody tr:nth-child(even) {
+            background-color: #3d546a;
+        }
+        tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        body.dark-mode tbody tr:hover {
+            background-color: #4a627d;
+        }
+        tbody tr.expired-row { /* Estilo para filas de historial expirado */
+            background-color: var(--warning-color);
+            color: white;
+        }
+        body.dark-mode tbody tr.expired-row {
+             background-color: #d35400; /* Un naranja más oscuro para el modo oscuro */
+        }
+
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--dark-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.5s ease, bottom 0.5s ease, background-color 0.3s ease; /* Transición para modo oscuro */
+            font-size: 1rem;
+        }
+        .toast.show {
+            opacity: 1;
+            bottom: 30px;
+        }
+        .modal#customAlertModal .modal-content {
+            max-width: 450px;
+            border-left: 5px solid var(--danger-color);
+        }
+        .modal#customAlertModal h2 {
+            color: var(--danger-color);
+        }
+        #customAlertMessage {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            white-space: pre-line;
+        }
+
+        /* --- Historial y estadísticas (NUEVO) --- */
+        .history-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            align-items: flex-end;
+            transition: background-color 0.3s ease;
+        }
+        .history-controls div {
+            flex-grow: 1;
+            min-width: 150px;
+        }
+        .history-controls label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        .history-controls input, .history-controls select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode .history-controls input, body.dark-mode .history-controls select {
+            background-color: var(--light-color);
+            border-color: #555;
+        }
+        .history-controls button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .history-controls button:hover {
+            background-color: #2980b9;
+        }
 
         .charts-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Ancho mínimo más grande */
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
             margin-top: 30px;
         }
         .chart-card {
-            background-color: var(--card-background); padding: 20px; border-radius: var(--border-radius); box-shadow: var(--box-shadow); transition: background-color 0.3s ease;
-        }
-        .chart-card h3 { text-align: center; color: var(--primary-color); margin-top: 0; margin-bottom: 20px; font-size: 1.1rem; }
-        .chart-card canvas {
-            max-height: 300px; /* Altura máxima aumentada */
-            width: 100% !important; height: auto !important;
-        }
-        .stat-cards-container { /* NUEVO: para min/max */
-             display: flex;
-            justify-content: space-around;
-            gap: 15px;
-            text-align: center;
-        }
-        .stat-card {
-            background: var(--light-color);
-            padding: 15px;
+            background-color: var(--card-background);
+            padding: 20px;
             border-radius: var(--border-radius);
-            flex-grow: 1;
+            box-shadow: var(--box-shadow);
+            transition: background-color 0.3s ease;
         }
-        .stat-card .value {
-            font-size: 2rem;
-            font-weight: 600;
+        .chart-card h3 {
+            text-align: center;
             color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
         }
-        .stat-card .label {
-            font-size: 0.9rem;
-            color: var(--dark-color);
+        .chart-card canvas {
+            max-height: 250px; /* Altura máxima para los gráficos */
+            width: 100% !important; /* Asegurar que ocupen el ancho de la tarjeta */
+            height: auto !important;
         }
-        body.dark-mode .stat-card { background-color: #3b5066; }
-        body.dark-mode .stat-card .label { color: var(--text-color); }
 
-
-        .heatmap-container { /* NUEVO: contenedor para el heatmap */
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .heatmap-day-row {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-        }
-        .heatmap-day-label {
-            flex: 0 0 100px; /* Ancho fijo para la etiqueta del día */
-            text-align: right;
-            padding-right: 10px;
-            font-size: 0.8em;
-            font-weight: bold;
-        }
+        /* Heatmap (para horas de congestión) */
         .heatmap-grid {
-            flex: 1;
             display: grid;
-            grid-template-columns: repeat(24, 1fr);
+            grid-template-columns: repeat(24, 1fr); /* 24 columnas para las horas */
             gap: 2px;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-top: 20px;
         }
         .heatmap-cell {
-            background-color: #f0f0f0; min-height: 25px; display: flex; justify-content: center; align-items: center; font-size: 0.7em; color: #555; position: relative; border-radius: 3px;
+            background-color: #f0f0f0; /* Color base */
+            min-height: 30px; /* Altura de la celda */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7em;
+            color: #555;
+            transition: background-color 0.5s ease;
+            position: relative;
         }
-        .heatmap-hour-labels {
-            display: grid;
-            grid-template-columns: repeat(24, 1fr);
-            gap: 2px;
-            margin-left: 112px; /* Alinear con las celdas de datos */
-            margin-bottom: 5px;
-        }
-        .heatmap-hour-label {
-             font-size: 0.6em; text-align: center; font-weight: bold; color: var(--dark-color);
-        }
-        body.dark-mode .heatmap-hour-label { color: var(--text-color); }
-        .heatmap-cell[data-level='0'] { background-color: #ebedf0; }
-        .heatmap-cell[data-level='1'] { background-color: #9be9a8; }
-        .heatmap-cell[data-level='2'] { background-color: #40c463; }
-        .heatmap-cell[data-level='3'] { background-color: #30a14e; }
-        .heatmap-cell[data-level='4'] { background-color: #216e39; }
-        body.dark-mode .heatmap-cell[data-level='0'] { background-color: #161b22; }
-        body.dark-mode .heatmap-cell[data-level='1'] { background-color: #0e4429; }
-        body.dark-mode .heatmap-cell[data-level='2'] { background-color: #006d32; }
-        body.dark-mode .heatmap-cell[data-level='3'] { background-color: #26a641; }
-        body.dark-mode .heatmap-cell[data-level='4'] { background-color: #39d353; }
-        .heatmap-cell .tooltip {
-            visibility: hidden;
-            width: 120px;
-            background-color: var(--dark-color);
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px 0;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.9em;
-            text-transform: none;
-        }
-        .heatmap-cell:hover .tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
-        
-        /* --- Footer (NUEVO) --- */
-        footer {
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 40px;
-            background-color: var(--light-color);
+        .heatmap-cell.hour-label {
+            font-weight: bold;
+            background-color: #e0e0e0;
             color: var(--dark-color);
-            font-size: 0.9rem;
-            text-transform: none;
-            border-top: 1px solid #ddd;
-            transition: background-color 0.3s, color 0.3s;
+            border-bottom: 1px solid #ccc;
         }
-        body.dark-mode footer {
-            background-color: #2c3e50;
-            color: #ecf0f1;
-            border-top: 1px solid #444;
+        body.dark-mode .heatmap-cell.hour-label {
+            background-color: #555;
+            color: var(--text-color);
+            border-color: #666;
+        }
+
+        /* Colores del heatmap (de menor a mayor ocupación) */
+        .heatmap-cell.level-0 { background-color: #ebfaeb; } /* Muy baja (verde muy claro) */
+        .heatmap-cell.level-1 { background-color: #c9e9c9; }
+        .heatmap-cell.level-2 { background-color: #a7d8a7; }
+        .heatmap-cell.level-3 { background-color: #85c785; }
+        .heatmap-cell.level-4 { background-color: #63b663; }
+        .heatmap-cell.level-5 { background-color: #41a541; }
+        .heatmap-cell.level-6 { background-color: #1f941f; } /* Más oscuro (verde oscuro) */
+
+        /* Colores del heatmap en modo oscuro */
+        body.dark-mode .heatmap-cell.level-0 { background-color: #3b5066; }
+        body.dark-mode .heatmap-cell.level-1 { background-color: #4a627d; }
+        body.dark-mode .heatmap-cell.level-2 { background-color: #5c7594; }
+        body.dark-mode .heatmap-cell.level-3 { background-color: #718aa6; }
+        body.dark-mode .heatmap-cell.level-4 { background-color: #879fbc; }
+        body.dark-mode .heatmap-cell.level-5 { background-color: #9cb4d1; }
+        body.dark-mode .heatmap-cell.level-6 { background-color: #b1c9e6; }
+
+        .heatmap-cell span.count {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 0.6em;
+            font-weight: bold;
+            color: #333; /* Contraste para el número */
+            background-color: rgba(255,255,255,0.7);
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+         body.dark-mode .heatmap-cell span.count {
+            color: #eee;
+            background-color: rgba(0,0,0,0.5);
         }
 
     </style>
@@ -652,12 +826,11 @@
                     <button onclick="exportarExcel()"><i class="fas fa-file-excel"></i> HISTORIAL A EXCEL</button>
                     <button onclick="exportarPDFActual()"><i class="fas fa-file-pdf"></i> ESTACIONAMIENTOS EN USO PDF</button>
                     <button onclick="exportarPDFHistorial()"><i class="fas fa-file-pdf"></i> HISTORIAL PDF</button>
-                    <button onclick="notificarAdministracion()"><i class="fas fa-envelope"></i> NOTIFICAR ADM.</button>
-                </div>
+                    <button onclick="notificarAdministracion()"><i class="fas fa-envelope"></i> NOTIFICAR ADM.</button> </div>
             </div>
             
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="BÚSQUEDA GLOBAL (PATENTE, DEPTO...)" onkeyup="manejarBusqueda(event)">
+                <input type="text" id="searchInput" placeholder="BUSCAR (PATENTE, DEPTO, NOMBRE...)" onkeyup="manejarBusqueda(event)">
                 <button onclick="ejecutarBusqueda()"><i class="fas fa-search"></i> BUSCAR</button>
             </div>
             <button onclick="resetearBusqueda()"><i class="fas fa-redo"></i> LIMPIAR BÚSQUEDA</button>
@@ -666,8 +839,7 @@
         <div class="tabs">
             <div class="tab active" onclick="mostrarTab('en-uso', this)"><i class="fas fa-car"></i> EN USO</div>
             <div class="tab" onclick="mostrarTab('historial', this)"><i class="fas fa-history"></i> HISTORIAL</div>
-            <div class="tab" onclick="mostrarTab('estadisticas', this)"><i class="fas fa-chart-line"></i> ESTADÍSTICAS</div>
-        </div>
+            <div class="tab" onclick="mostrarTab('estadisticas', this)"><i class="fas fa-chart-line"></i> ESTADÍSTICAS</div> </div>
 
         <div id="en-uso" class="tab-content active">
             <div class="parking-grid" id="parkingGrid"></div>
@@ -675,18 +847,18 @@
 
         <div id="historial" class="tab-content">
             <h2><i class="fas fa-clipboard-list"></i> REGISTRO HISTÓRICO DE VISITAS</h2>
-            <div class="controls-container">
-                <div class="control-group">
+            <div class="history-controls">
+                <div>
                     <label for="filterDate">FILTRAR POR FECHA:</label>
                     <input type="date" id="filterDate" onchange="aplicarFiltrosHistorial()">
                 </div>
-                <div class="control-group">
+                <div>
                     <label for="filterConserje">FILTRAR POR CONSERJE:</label>
                     <select id="filterConserje" onchange="aplicarFiltrosHistorial()">
                         <option value="">TODOS</option>
-                    </select>
+                        </select>
                 </div>
-                <div class="control-group">
+                <div>
                     <label for="filterAction">FILTRAR POR ACCIÓN:</label>
                     <select id="filterAction" onchange="aplicarFiltrosHistorial()">
                         <option value="">TODOS</option>
@@ -695,10 +867,14 @@
                         <option value="EXPIRADO">EXPIRADO</option>
                     </select>
                 </div>
-                <div class="control-group">
-                    <button onclick="aplicarFiltrosHistorial()"><i class="fas fa-filter"></i> APLICAR</button>
-                    <button onclick="resetearFiltrosHistorial()"><i class="fas fa-eraser"></i> REINICIAR</button>
-                    <button onclick="exportarPDFHistorialFiltrado()"><i class="fas fa-file-pdf"></i> EXPORTAR FILTRO</button>
+                <div>
+                    <button onclick="aplicarFiltrosHistorial()"><i class="fas fa-filter"></i> APLICAR FILTROS</button>
+                </div>
+                <div>
+                    <button onclick="resetearFiltrosHistorial()"><i class="fas fa-eraser"></i> REINICIAR FILTROS</button>
+                </div>
+                <div>
+                    <button onclick="exportarPDFHistorialFiltrado()"><i class="fas fa-file-pdf"></i> EXPORTAR FILTRO PDF</button>
                 </div>
             </div>
 
@@ -706,10 +882,19 @@
                 <table id="registroVisitasTable">
                     <thead>
                         <tr>
-                            <th>N° EST.</th><th>NOMBRE</th><th>RUT</th><th>PATENTE</th><th>UNIDAD</th>
-                            <th>INGRESADO POR</th><th>H. INGRESO</th><th>H. SALIDA</th><th>T. TOTAL</th>
-                            <th>CF</th><th>NOTIF.</th><th>ESTADO</th><th>FECHA</th>
-                        </tr>
+                            <th>N° EST.</th>
+                            <th>NOMBRE</th>
+                            <th>RUT</th>
+                            <th>PATENTE</th>
+                            <th>UNIDAD</th>
+                            <th>INGRESADO POR</th>
+                            <th>H. INGRESO</th>
+                            <th>H. SALIDA</th>
+                            <th>T. TOTAL</th>
+                            <th>CF</th>
+                            <th>NOTIF.</th>
+                            <th>ESTADO</th>
+                            <th>FECHA</th> </tr>
                     </thead>
                     <tbody>
                     </tbody>
@@ -718,56 +903,50 @@
         </div>
 
         <div id="estadisticas" class="tab-content">
-            <h2><i class="fas fa-chart-line"></i> ANÁLISIS Y ESTADÍSTICAS AVANZADAS</h2>
-             <div class="controls-container">
-                <div class="control-group">
-                    <label for="statsStartDate">FECHA DE INICIO:</label>
-                    <input type="date" id="statsStartDate">
-                </div>
-                <div class="control-group">
-                    <label for="statsEndDate">FECHA DE FIN:</label>
-                    <input type="date" id="statsEndDate">
-                </div>
-                <div class="control-group">
-                     <button onclick="calcularEstadisticas()"><i class="fas fa-sync-alt"></i> ACTUALIZAR ESTADÍSTICAS</button>
-                </div>
-            </div>
-            
-             <div class="chart-card">
-                 <h3>OCUPACIÓN HISTÓRICA (RANGO SELECCIONADO)</h3>
-                 <div class="stat-cards-container">
-                    <div class="stat-card">
-                        <div class="value" id="maxOccupancy">0</div>
-                        <div class="label">Ocupación Máxima Diaria</div>
-                    </div>
-                     <div class="stat-card">
-                        <div class="value" id="minOccupancy">0</div>
-                        <div class="label">Ocupación Mínima Diaria</div>
-                    </div>
-                </div>
-            </div>
-
+            <h2><i class="fas fa-chart-line"></i> ESTADÍSTICAS DEL ESTACIONAMIENTO</h2>
             <div class="charts-container">
-                <div class="chart-card">
-                    <h3>TOP 5 - UNIDADES CON MÁS VISITAS</h3>
-                    <canvas id="topUnitsChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>DURACIÓN PROMEDIO DE VISITA POR UNIDAD (TOP 5)</h3>
-                    <canvas id="avgStayByUnitChart"></canvas>
-                </div>
                 <div class="chart-card">
                     <h3>PROMEDIO DIARIO DE OCUPACIÓN</h3>
                     <canvas id="dailyOccupancyChart"></canvas>
                 </div>
                 <div class="chart-card">
-                    <h3>OCUPACIÓN PROMEDIO POR HORA Y DÍA DE LA SEMANA</h3>
-                    <div id="heatmapContainer"></div>
+                    <h3>TIEMPO PROMEDIO DE PERMANENCIA</h3>
+                    <canvas id="avgStayTimeChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>HORAS DE CONGESTIÓN PICO</h3>
+                    <div class="heatmap-grid" id="congestionHeatmap">
+                        <div class="heatmap-cell hour-label">00h</div>
+                        <div class="heatmap-cell hour-label">01h</div>
+                        <div class="heatmap-cell hour-label">02h</div>
+                        <div class="heatmap-cell hour-label">03h</div>
+                        <div class="heatmap-cell hour-label">04h</div>
+                        <div class="heatmap-cell hour-label">05h</div>
+                        <div class="heatmap-cell hour-label">06h</div>
+                        <div class="heatmap-cell hour-label">07h</div>
+                        <div class="heatmap-cell hour-label">08h</div>
+                        <div class="heatmap-cell hour-label">09h</div>
+                        <div class="heatmap-cell hour-label">10h</div>
+                        <div class="heatmap-cell hour-label">11h</div>
+                        <div class="heatmap-cell hour-label">12h</div>
+                        <div class="heatmap-cell hour-label">13h</div>
+                        <div class="heatmap-cell hour-label">14h</div>
+                        <div class="heatmap-cell hour-label">15h</div>
+                        <div class="heatmap-cell hour-label">16h</div>
+                        <div class="heatmap-cell hour-label">17h</div>
+                        <div class="heatmap-cell hour-label">18h</div>
+                        <div class="heatmap-cell hour-label">19h</div>
+                        <div class="heatmap-cell hour-label">20h</div>
+                        <div class="heatmap-cell hour-label">21h</div>
+                        <div class="heatmap-cell hour-label">22h</div>
+                        <div class="heatmap-cell hour-label">23h</div>
+                        </div>
                 </div>
             </div>
         </div>
+
     </div>
-    
+
     <div id="infoModal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitulo"></h2>
@@ -818,16 +997,30 @@
             </div>
         </div>
     </div>
-    <div id="smartAlertModal" class="modal"><div class="modal-content"><h2><i class="fas fa-exclamation-circle"></i> ATENCIÓN - TIEMPO EXCEDIDO</h2><p id="smartAlertMessage"></p><div class="modal-buttons" style="justify-content: center;"><button class="btn-primary" onclick="cerrarSmartAlert()"><i class="fas fa-check"></i> ENTENDIDO</button></div></div></div>
-    <div id="customAlertModal" class="modal"><div class="modal-content"><h2><i class="fas fa-exclamation-triangle"></i> ATENCIÓN</h2><p id="customAlertMessage"></p><div class="modal-buttons" style="justify-content: center;"><button class="btn-primary" onclick="cerrarCustomAlert()"><i class="fas fa-check"></i> ENTENDIDO</button></div></div></div>
+
+    <div id="smartAlertModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-exclamation-circle"></i> ATENCIÓN - TIEMPO EXCEDIDO</h2>
+            <p id="smartAlertMessage"></p>
+            <div class="modal-buttons" style="justify-content: center;">
+                <button class="btn-primary" onclick="cerrarSmartAlert()"><i class="fas fa-check"></i> ENTENDIDO</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="customAlertModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-exclamation-triangle"></i> ATENCIÓN</h2>
+            <p id="customAlertMessage"></p>
+            <div class="modal-buttons" style="justify-content: center;">
+                <button class="btn-primary" onclick="cerrarCustomAlert()"><i class="fas fa-check"></i> ENTENDIDO</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast">MENSAJE</div>
-    
-    <footer>
-        <p>&copy; 2024 Cumbres de Quilpué. Todos los derechos reservados. Uso exclusivo para Condominio Cumbres de Quilpué.</p>
-    </footer>
 
     <script>
-        // Versión 5 del script con todas las mejoras.
         const TOTAL_ESTACIONAMIENTOS = 32;
         const TIEMPO_MAXIMO_SEGUNDOS = 8 * 60 * 60; // 8 horas
         const INTERVALO_GUARDADO_AUTO = 10 * 60 * 1000; // 10 minutos
@@ -844,41 +1037,45 @@
         let resultadosBusqueda = [];
 
         // Gráficos
-        let dailyOccupancyChart, topUnitsChart, avgStayByUnitChart;
-        let audioContext; // NUEVO: Contexto de audio para alertas sonoras
+        let dailyOccupancyChart;
+        let avgStayTimeChart;
 
         // --- INICIALIZACIÓN Y MANEJO DE DATOS LOCALES ---
         document.addEventListener('DOMContentLoaded', () => {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            } catch (e) {
-                console.warn("Web Audio API no es soportada en este navegador.");
-            }
-
             cargarDatosLocales();
+            // Asegurarse de que la estructura de estacionamientos esté alineada con TOTAL_ESTACIONAMIENTOS
             if (estacionamientos.length !== TOTAL_ESTACIONAMIENTOS || estacionamientos.some(e => typeof e.id === 'undefined')) { 
-                console.warn("Datos de estacionamientos inconsistentes, reiniciando estructura.");
+                console.warn("DATOS DE ESTACIONAMIENTOS INCONSISTENTES, REINICIANDO ESTRUCTURA.");
                 inicializarEstacionamientos();
             }
             actualizarDisplayEstacionamientos();
             actualizarTablaHistorial();
-            actualizarPanelesSuperiores();
+            actualizarPanelesSuperiores(); // NUEVO: Actualizar paneles al cargar
             iniciarGuardadoAutomatico();
-            configurarReportesProgramados();
+            configurarRevisionAutomaticaEmail();
             configurarInputsMayusculas();
-            cargarPreferenciaModoOscuro();
-            iniciarSmartAlerts();
-            llenarFiltroConserjes();
+            cargarPreferenciaModoOscuro(); // NUEVO: Cargar preferencia de modo oscuro
+            iniciarSmartAlerts(); // NUEVO: Iniciar alertas inteligentes
+            llenarFiltroConserjes(); // NUEVO: Llenar opciones del filtro de conserjes
 
+            // Mostrar la pestaña "En Uso" por defecto
             mostrarTab('en-uso', document.querySelector('.tabs .tab:first-child')); 
+
+            // Listener para el botón de modo oscuro
             document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
         });
 
         window.addEventListener('beforeunload', guardarDatosLocales); 
 
         function configurarInputsMayusculas() {
-            document.querySelectorAll('input[type="text"]').forEach(input => {
-                input.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+            const inputsTexto = document.querySelectorAll('#formOcupar input[type="text"]');
+            inputsTexto.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase();
+                });
+            });
+            document.getElementById('searchInput').addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
             });
         }
 
@@ -888,37 +1085,53 @@
                 ocupado: false,
                 datosVehiculo: null,
                 timerId: null,
-                tiempoRestanteSegundos: TIEMPO_MAXIMO_SEGUNDOS,
-                alertaSonoraActivada: false // NUEVO: para control de sonido
+                tiempoRestanteSegundos: TIEMPO_MAXIMO_SEGUNDOS
             }));
         }
 
         function cargarDatosLocales() {
-            const datosGuardados = localStorage.getItem('controlEstacionamientosCumbresV5'); // CAMBIO: Versión 5
+            const datosGuardados = localStorage.getItem('controlEstacionamientosCumbresV4'); // CAMBIO: Versión 4
             if (datosGuardados) {
                 try {
                     const parsedData = JSON.parse(datosGuardados);
                     estacionamientos = parsedData.estacionamientos || [];
                     registroVisitas = parsedData.registroVisitas || [];
 
+                    // Si el número de estacionamientos guardados no coincide, forzar reinicialización de estacionamientos
                     if (estacionamientos.length !== TOTAL_ESTACIONAMIENTOS) {
-                        console.warn("Número de estacionamientos modificado. Reiniciando la estructura.");
+                        console.warn("NÚMERO DE ESTACIONAMIENTOS MODIFICADO. REINICIANDO LA ESTRUCTURA DE ESTACIONAMIENTOS.");
                         inicializarEstacionamientos();
+                        // Conservar el historial si es válido
                         registroVisitas = parsedData.registroVisitas || [];
                     }
 
                     estacionamientos.forEach(est => {
-                        est.alertaSonoraActivada = est.alertaSonoraActivada || false; // Asegurar que la propiedad existe
                         if (est.ocupado && est.datosVehiculo && est.datosVehiculo.horaIngresoISO) {
                             const tiempoDesdeIngreso = (new Date() - new Date(est.datosVehiculo.horaIngresoISO)) / 1000;
                             est.tiempoRestanteSegundos = Math.max(0, TIEMPO_MAXIMO_SEGUNDOS - tiempoDesdeIngreso);
                             if (est.tiempoRestanteSegundos > 0) {
                                 iniciarTimerEstacionamiento(est.id);
+                            } else {
+                                // Si el tiempo ha expirado, asegurarse de que el estado refleje esto
+                                // Esto se manejará mejor con las alertas inteligentes ahora
+                                console.warn(`ESTACIONAMIENTO ${est.id} CARGADO CON TIEMPO EXPIRADO.`);
                             }
                         } else if (!est.ocupado) {
                             est.tiempoRestanteSegundos = TIEMPO_MAXIMO_SEGUNDOS;
                         }
+                        // Asegurar que los datos textuales estén en mayúsculas al cargar
+                        if (est.datosVehiculo) {
+                            ['nombre', 'rut', 'patente', 'unidad', 'ingresadoPor'].forEach(field => {
+                                if(est.datosVehiculo[field]) est.datosVehiculo[field] = est.datosVehiculo[field].toUpperCase();
+                            });
+                        }
                     });
+                    registroVisitas.forEach(visita => {
+                        ['nombre', 'rut', 'patente', 'unidad', 'ingresadoPor', 'estado'].forEach(field => {
+                            if(visita[field]) visita[field] = visita[field].toUpperCase();
+                        });
+                    });
+
                 } catch (error) {
                     console.error("ERROR AL CARGAR DATOS LOCALES:", error);
                     inicializarEstacionamientos(); 
@@ -930,17 +1143,15 @@
 
         function guardarDatosLocales() {
             try {
-                // Detener timers antes de guardar para no almacenar IDs de intervalo inválidos
-                estacionamientos.forEach(est => { if(est.timerId) clearInterval(est.timerId); est.timerId = null; });
                 const dataToSave = {
-                    estacionamientos: estacionamientos.map(({ timerId, ...rest }) => rest), // No guardar timerId
+                    estacionamientos: estacionamientos,
                     registroVisitas: registroVisitas
                 };
-                localStorage.setItem('controlEstacionamientosCumbresV5', JSON.stringify(dataToSave));
-                console.log("Datos guardados localmente.");
+                localStorage.setItem('controlEstacionamientosCumbresV4', JSON.stringify(dataToSave)); // CAMBIO: Versión 4
+                console.log("DATOS GUARDADOS LOCALMENTE.");
             } catch (error) {
                 console.error("ERROR AL GUARDAR DATOS LOCALES:", error);
-                mostrarToast("ERROR AL GUARDAR DATOS. ¿ESPACIO LLENO?", 'var(--danger-color)');
+                mostrarToast("ERROR AL GUARDAR DATOS. ESPACIO LLENO?", 'var(--danger-color)');
             }
         }
 
@@ -952,58 +1163,53 @@
             }, INTERVALO_GUARDADO_AUTO);
         }
 
-        // --- Alerta Sonora (NUEVO) ---
-        function playAlertSound() {
-            if (!audioContext) return;
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(660, audioContext.currentTime); // E5
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.8);
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.8);
-        }
 
         // --- LÓGICA DE ESTACIONAMIENTOS ---
         function actualizarDisplayEstacionamientos() {
             const parkingGrid = document.getElementById('parkingGrid');
             parkingGrid.innerHTML = '';
 
-            const estacionamientosAMostrar = busquedaActiva ? resultadosBusqueda.filter(r => r.type === 'estacionamiento').map(r => r.data) : estacionamientos;
+            const estacionamientosAmostrar = busquedaActiva ? resultadosBusqueda.filter(r => r.type === 'estacionamiento').map(r => r.data) : estacionamientos;
 
-            estacionamientosAMostrar.forEach(est => {
+            estacionamientosAmostrar.forEach(est => {
                 const spotDiv = document.createElement('div');
-                let additionalClass = (est.id === 1 || est.id === 2) ? 'discapacitados' : '';
+                let additionalClass = '';
+                if (est.id === 1 || est.id === 2) {
+                    additionalClass = 'discapacitados';
+                }
                 spotDiv.className = `parking-spot ${est.ocupado ? 'ocupado' : 'disponible'} ${additionalClass}`;
                 spotDiv.onclick = () => abrirModal(est.id);
 
                 let spotInfoContent = '';
                 if (est.ocupado && est.datosVehiculo) {
-                    spotInfoContent = `<div class="spot-info">PAT: ${est.datosVehiculo.patente || 'N/A'}<br>UNI: ${est.datosVehiculo.unidad || 'N/A'}</div>`;
+                    spotInfoContent = `
+                        <div class="spot-info">
+                            PAT: ${est.datosVehiculo.patente || 'N/A'}<br>
+                            UNI: ${est.datosVehiculo.unidad || 'N/A'}
+                        </div>`;
                 }
 
                 let warningIcon = '';
-                if (est.ocupado && est.tiempoRestanteSegundos === 0) {
-                    warningIcon = '<i class="fas fa-clock warning-icon time-expired-warning" title="TIEMPO EXPIRADO"></i>';
-                    spotDiv.classList.add('expired-flash'); // NUEVO: Añadir clase para parpadeo
-                } else if (est.ocupado && est.tiempoRestanteSegundos <= 15 * 60) { 
+                if (est.ocupado && est.tiempoRestanteSegundos <= 15 * 60 && est.tiempoRestanteSegundos > 0) { 
                     warningIcon = '<i class="fas fa-exclamation-triangle warning-icon" title="TIEMPO PRÓXIMO A EXPIRAR"></i>';
+                } else if (est.ocupado && est.tiempoRestanteSegundos === 0) {
+                     warningIcon = '<i class="fas fa-clock warning-icon time-expired-warning" title="TIEMPO EXPIRADO"></i>';
                 }
 
-                spotDiv.innerHTML = `<h3>EST. ${est.id}</h3><i class="fas ${est.ocupado ? 'fa-car-side' : 'fa-check-circle'} status-icon"></i><div class="timer">${formatoTiempo(est.tiempoRestanteSegundos)}</div>${spotInfoContent}${warningIcon}`;
+                spotDiv.innerHTML = `
+                    <h3>EST. ${est.id}</h3>
+                    <i class="fas ${est.ocupado ? 'fa-car-side' : 'fa-check-circle'} status-icon"></i>
+                    <div class="timer">${formatoTiempo(est.tiempoRestanteSegundos)}</div>
+                    ${spotInfoContent}
+                    ${warningIcon}
+                `;
                 parkingGrid.appendChild(spotDiv);
             });
 
-            if (busquedaActiva && estacionamientosAMostrar.length === 0 && document.getElementById('en-uso').classList.contains('active')) {
+            if (busquedaActiva && estacionamientosAmostrar.length === 0 && document.getElementById('en-uso').classList.contains('active')) {
                 parkingGrid.innerHTML = '<p style="text-align: center; color: var(--text-color);">NO SE ENCONTRARON ESTACIONAMIENTOS EN USO CON ESTE CRITERIO.</p>';
             }
-            actualizarPanelesSuperiores();
+            actualizarPanelesSuperiores(); // Siempre actualizar los paneles después de actualizar el display
         }
 
         function iniciarTimerEstacionamiento(idEstacionamiento) {
@@ -1012,55 +1218,47 @@
             if (est.timerId) clearInterval(est.timerId);
 
             est.timerId = setInterval(() => {
-                if (est.tiempoRestanteSegundos > 0) {
-                    est.tiempoRestanteSegundos--;
-                } else {
-                    est.tiempoRestanteSegundos = 0;
-                    if (!est.alertaSonoraActivada) {
-                        playAlertSound(); // NUEVO: Llamar a la alerta sonora
-                        est.alertaSonoraActivada = true; // Marcar para que no suene de nuevo
-                    }
-                    mostrarToast(`¡TIEMPO LÍMITE ALCANZADO PARA EST. ${est.id}!`, 'var(--warning-color)');
+                est.tiempoRestanteSegundos = Math.max(0, est.tiempoRestanteSegundos - 1);
+                actualizarDisplayEstacionamientos(); 
+
+                if (est.tiempoRestanteSegundos === 0) {
                     clearInterval(est.timerId);
                     est.timerId = null;
-                }
-                // Actualizar solo la tarjeta afectada para mejorar el rendimiento
-                const spotDiv = document.querySelector(`.parking-spot[onclick="abrirModal(${est.id})"]`);
-                if(spotDiv) { // Solo si la tarjeta está visible
-                    spotDiv.querySelector('.timer').textContent = formatoTiempo(est.tiempoRestanteSegundos);
-                     if (est.tiempoRestanteSegundos === 0 && !spotDiv.classList.contains('expired-flash')) {
-                        spotDiv.classList.add('expired-flash');
-                        spotDiv.querySelector('.warning-icon')?.remove();
-                        spotDiv.insertAdjacentHTML('beforeend', '<i class="fas fa-clock warning-icon time-expired-warning" title="TIEMPO EXPIRADO"></i>');
-                    }
+                    mostrarToast(`¡TIEMPO LÍMITE ALCANZADO PARA EST. ${est.id}!`, 'var(--warning-color)');
                 }
             }, 1000);
         }
-        
+
         function ocuparEstacionamiento(idEstacionamiento, nombre, rut, patente, unidad, ingresadoPor, ingresadoCF, notificadoResidente) {
             const est = estacionamientos.find(e => e.id === idEstacionamiento);
             if (est && !est.ocupado) {
                 const ahora = new Date();
                 est.ocupado = true;
                 est.datosVehiculo = {
-                    nombre, rut, patente, unidad, ingresadoPor, ingresadoCF, notificadoResidente,
+                    nombre: nombre.toUpperCase(),
+                    rut: rut.toUpperCase(),
+                    patente: patente.toUpperCase(),
+                    unidad: unidad.toUpperCase(),
+                    ingresadoPor: ingresadoPor.toUpperCase(),
                     horaIngresoISO: ahora.toISOString(),
                     horaIngresoDisplay: ahora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    ingresadoCF: ingresadoCF,
+                    notificadoResidente: notificadoResidente
                 };
                 est.tiempoRestanteSegundos = TIEMPO_MAXIMO_SEGUNDOS;
-                est.alertaSonoraActivada = false; // Resetear bandera de sonido
                 iniciarTimerEstacionamiento(idEstacionamiento);
                 actualizarDisplayEstacionamientos();
                 guardarDatosLocales(); 
                 mostrarToast(`ESTACIONAMIENTO ${idEstacionamiento} OCUPADO.`, 'var(--primary-color)');
             }
         }
-        
+
         function liberarEstacionamiento(idEstacionamiento) {
             const est = estacionamientos.find(e => e.id === idEstacionamiento);
             if (est && est.ocupado) {
                 if (est.timerId) clearInterval(est.timerId);
-                
+                est.timerId = null;
+
                 const horaSalida = new Date();
                 const horaIngreso = new Date(est.datosVehiculo.horaIngresoISO);
                 const tiempoTotalSegundos = Math.floor((horaSalida - horaIngreso) / 1000);
@@ -1074,19 +1272,16 @@
                     ingresadoPor: est.datosVehiculo.ingresadoPor,
                     horaIngreso: est.datosVehiculo.horaIngresoDisplay,
                     horaSalida: horaSalida.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-                    tiempoTotalSegundos: tiempoTotalSegundos,
                     tiempoTotal: formatoTiempo(tiempoTotalSegundos),
                     ingresadoCF: est.datosVehiculo.ingresadoCF,
                     notificadoResidente: est.datosVehiculo.notificadoResidente,
-                    estado: (tiempoTotalSegundos >= TIEMPO_MAXIMO_SEGUNDOS ? 'EXPIRADO' : 'SALIDA'),
-                    fecha: horaSalida.toISOString().split('T')[0]
+                    estado: (tiempoTotalSegundos >= TIEMPO_MAXIMO_SEGUNDOS ? 'EXPIRADO' : 'LIBERADO A TIEMPO').toUpperCase(), // Estado actualizado
+                    fecha: horaSalida.toISOString().split('T')[0] // Formato YYYY-MM-DD para el filtro
                 });
 
                 est.ocupado = false;
                 est.datosVehiculo = null;
                 est.tiempoRestanteSegundos = TIEMPO_MAXIMO_SEGUNDOS;
-                est.timerId = null;
-                est.alertaSonoraActivada = false;
 
                 actualizarDisplayEstacionamientos();
                 actualizarTablaHistorial();
@@ -1094,12 +1289,615 @@
                 mostrarToast(`ESTACIONAMIENTO ${idEstacionamiento} LIBERADO.`, 'var(--secondary-color)');
             }
         }
+
+        // --- MANEJO DE MODALES Y ALERTAS ---
+        function abrirModal(idEstacionamiento) {
+            estacionamientoSeleccionadoId = idEstacionamiento;
+            const est = estacionamientos.find(e => e.id === idEstacionamiento);
+            const modal = document.getElementById('infoModal');
+            const modalTitulo = document.getElementById('modalTitulo');
+            const formOcupar = document.getElementById('formOcupar');
+            const infoOcupado = document.getElementById('infoOcupado');
+
+            modalTitulo.textContent = `ESTACIONAMIENTO N° ${est.id}`;
+
+            if (est.ocupado) {
+                document.getElementById('modalNombre').textContent = est.datosVehiculo.nombre || 'N/A';
+                document.getElementById('modalRut').textContent = est.datosVehiculo.rut || 'N/A';
+                document.getElementById('modalPatente').textContent = est.datosVehiculo.patente || 'N/A';
+                document.getElementById('modalUnidad').textContent = est.datosVehiculo.unidad || 'N/A';
+                document.getElementById('modalIngresadoPor').textContent = est.datosVehiculo.ingresadoPor || 'N/A';
+                document.getElementById('modalIngreso').textContent = est.datosVehiculo.horaIngresoDisplay || 'N/A';
+                document.getElementById('modalTiempoRestante').textContent = formatoTiempo(est.tiempoRestanteSegundos);
+                document.getElementById('modalIngresadoCF').textContent = est.datosVehiculo.ingresadoCF ? 'SÍ' : 'NO';
+                document.getElementById('modalNotificadoResidente').textContent = est.datosVehiculo.notificadoResidente ? 'SÍ' : 'NO';
+                formOcupar.style.display = 'none';
+                infoOcupado.style.display = 'block';
+            } else {
+                document.getElementById('nombreInput').value = '';
+                document.getElementById('rutInput').value = '';
+                document.getElementById('patenteInput').value = '';
+                document.getElementById('unidadInput').value = '';
+                document.getElementById('ingresadoPorInput').value = '';
+                document.getElementById('ingresadoCFInput').checked = false;
+                document.getElementById('notificadoResidenteInput').checked = false;
+                formOcupar.style.display = 'block';
+                infoOcupado.style.display = 'none';
+                document.getElementById('nombreInput').focus();
+            }
+            modal.style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('infoModal').style.display = 'none';
+            estacionamientoSeleccionadoId = null;
+        }
+
+        function confirmarOcupar() {
+            const nombre = document.getElementById('nombreInput').value.trim().toUpperCase();
+            const rut = document.getElementById('rutInput').value.trim().toUpperCase();
+            const patente = document.getElementById('patenteInput').value.trim().toUpperCase();
+            const unidad = document.getElementById('unidadInput').value.trim().toUpperCase();
+            const ingresadoPor = document.getElementById('ingresadoPorInput').value.trim().toUpperCase();
+            const ingresadoCF = document.getElementById('ingresadoCFInput').checked;
+            const notificadoResidente = document.getElementById('notificadoResidenteInput').checked;
+
+            if (!nombre || !patente || !unidad || !rut || !ingresadoPor) {
+                mostrarCustomAlert('POR FAVOR, COMPLETE TODOS LOS CAMPOS OBLIGATORIOS: NOMBRE, RUT, PATENTE, UNIDAD E INGRESADO POR.');
+                return;
+            }
+            if (patente.length < 4) { 
+                mostrarCustomAlert('LA PATENTE PARECE SER MUY CORTA.');
+                return;
+            }
+            const rutLimpio = rut.replace(/[^0-9Kk]/g, ''); 
+            if (rutLimpio.length < 7) { 
+                 mostrarCustomAlert('EL RUT INGRESADO NO ES VÁLIDO. DEBE SER SIN PUNTOS NI GUIÓN E INCLUIR DÍGITO VERIFICADOR (MÍNIMO 7 CARACTERES).');
+                return;
+            }
+
+            if (!ingresadoCF || !notificadoResidente) {
+                let mensajeAlerta = "VISITA NO AUTORIZADA A INGRESAR A ESTACIONAMIENTO.\n\nMOTIVOS:\n";
+                if (!ingresadoCF) {
+                    mensajeAlerta += "- NO REGISTRADA EN COMUNIDADFELIZ.\n";
+                }
+                if (!notificadoResidente) {
+                    mensajeAlerta += "- NINGÚN RESIDENTE SOLICITÓ EL INGRESO O NO HA SIDO NOTIFICADO.\n";
+                }
+                mensajeAlerta += "\nFAVOR CONTACTAR A UNIDAD CORRESPONDIENTE.";
+                
+                mostrarCustomAlert(mensajeAlerta);
+                return; 
+            }
+
+            ocuparEstacionamiento(estacionamientoSeleccionadoId, nombre, rut, patente, unidad, ingresadoPor, ingresadoCF, notificadoResidente);
+            cerrarModal();
+        }
+
+        function liberarDesdeModal() {
+            if (estacionamientoSeleccionadoId !== null) {
+                liberarEstacionamiento(estacionamientoSeleccionadoId);
+            }
+            cerrarModal();
+        }
         
-        // --- MANEJO DE MODALES ---
-        // (Sin cambios significativos, se omiten por brevedad: abrirModal, cerrarModal, confirmarOcupar, liberarDesdeModal, etc.)
-        // La lógica existente es funcional para las nuevas mejoras.
+        function mostrarCustomAlert(mensaje) {
+            document.getElementById('customAlertMessage').innerText = mensaje.toUpperCase();
+            document.getElementById('customAlertModal').style.display = 'flex';
+        }
+
+        function cerrarCustomAlert() {
+            document.getElementById('customAlertModal').style.display = 'none';
+        }
+
+        // NUEVO: Alertas Inteligentes
+        function iniciarSmartAlerts() {
+            if (smartAlertInterval) clearInterval(smartAlertInterval);
+            smartAlertInterval = setInterval(revisarTiempoExcedido, INTERVALO_REVISION_ALERTAS);
+        }
+
+        function revisarTiempoExcedido() {
+            const ahora = new Date().getTime(); // Tiempo actual en milisegundos
+            estacionamientos.forEach(est => {
+                if (est.ocupado && est.datosVehiculo && est.datosVehiculo.horaIngresoISO) {
+                    const horaIngresoMs = new Date(est.datosVehiculo.horaIngresoISO).getTime();
+                    const tiempoTranscurridoMs = ahora - horaIngresoMs;
+                    
+                    // Si el tiempo transcurrido es mayor o igual a 8 horas (TIEMPO_MAXIMO_SEGUNDOS)
+                    if (tiempoTranscurridoMs >= TIEMPO_MAXIMO_SEGUNDOS * 1000) {
+                        const mensaje = `EL ESTACIONAMIENTO N° ${est.id} HA SUPERADO LAS 8 HORAS DE OCUPACIÓN.\n\n` +
+                                        `VEHÍCULO: ${est.datosVehiculo.patente}\n` +
+                                        `RESIDENTE/UNIDAD: ${est.datosVehiculo.nombre} (${est.datosVehiculo.unidad})\n\n` +
+                                        `SE SUGIERE NOTIFICAR AL RESIDENTE O PROPIETARIO DE LA UNIDAD CORRESPONDIENTE.`;
+                        mostrarSmartAlert(mensaje);
+                    }
+                }
+            });
+        }
+
+        function mostrarSmartAlert(mensaje) {
+            document.getElementById('smartAlertMessage').innerText = mensaje.toUpperCase();
+            document.getElementById('smartAlertModal').style.display = 'flex';
+        }
+
+        function cerrarSmartAlert() {
+            document.getElementById('smartAlertModal').style.display = 'none';
+        }
+
+        // --- PANELES SUPERIORES (NUEVO) ---
+        function actualizarPanelesSuperiores() {
+            const ocupadosCount = estacionamientos.filter(est => est.ocupado).length;
+            const disponiblesCount = TOTAL_ESTACIONAMIENTOS - ocupadosCount;
+
+            document.getElementById('totalSpots').textContent = TOTAL_ESTACIONAMIENTOS;
+            document.getElementById('availableSpots').textContent = disponiblesCount;
+            document.getElementById('occupiedSpots').textContent = ocupadosCount;
+        }
+
+        // --- HISTORIAL Y ESTADÍSTICAS (NUEVO) ---
+        function actualizarTablaHistorial() {
+            const tbody = document.querySelector('#registroVisitasTable tbody');
+            tbody.innerHTML = '';
+
+            // Usar registros filtrados si existen, de lo contrario, todos
+            const registrosParaMostrar = (busquedaActiva && document.getElementById('historial').classList.contains('active')) 
+                                        ? resultadosBusqueda.filter(r => r.type === 'historial').map(r => r.data) 
+                                        : registroVisitas;
+            
+            // Aplicar filtros adicionales del historial
+            const filterDate = document.getElementById('filterDate').value;
+            const filterConserje = document.getElementById('filterConserje').value;
+            const filterAction = document.getElementById('filterAction').value;
+
+            const filteredRecords = registrosParaMostrar.filter(visita => {
+                let match = true;
+                if (filterDate && visita.fecha !== filterDate) {
+                    match = false;
+                }
+                if (filterConserje && (visita.ingresadoPor || '').toUpperCase() !== filterConserje.toUpperCase()) {
+                    match = false;
+                }
+                if (filterAction) {
+                    if (filterAction === "INGRESO" && visita.horaSalida) match = false; // "INGRESO" implica que aún no tiene hora de salida
+                    if (filterAction === "SALIDA" && !visita.horaSalida) match = false; // "SALIDA" implica que ya tiene hora de salida y no es expirado
+                    if (filterAction === "SALIDA" && visita.estado === "EXPIRADO") match = false;
+                    if (filterAction === "EXPIRADO" && visita.estado !== "EXPIRADO") match = false;
+                    // Note: La lógica de "INGRESO" es ambigua sin un campo de acción explícito en el historial.
+                    // Se asume que "INGRESO" es un registro sin hora de salida todavía, lo cual no es el caso en tu estructura actual.
+                    // Tu estructura actual solo añade al historial cuando hay una HORA DE SALIDA.
+                    // Por lo tanto, el filtro de "INGRESO" como acción es menos útil aquí a menos que cambies el registro.
+                    // Para simplificar, "INGRESO" significa que fue un registro completo, y "SALIDA" es liberado a tiempo.
+                    if (filterAction === "INGRESO" && visita.estado !== "LIBERADO A TIEMPO" && visita.estado !== "EXPIRADO") match = false;
+                }
+                return match;
+            });
+
+
+            [...filteredRecords].reverse().forEach(visita => { // Muestra los más recientes primero
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${visita.estacionamiento}</td>
+                    <td>${(visita.nombre || '-').toUpperCase()}</td>
+                    <td>${(visita.rut || '-').toUpperCase()}</td>
+                    <td>${(visita.patente || '-').toUpperCase()}</td>
+                    <td>${(visita.unidad || '-').toUpperCase()}</td>
+                    <td>${(visita.ingresadoPor || '-').toUpperCase()}</td>
+                    <td>${visita.horaIngreso || '-'}</td>
+                    <td>${visita.horaSalida || '-'}</td>
+                    <td>${visita.tiempoTotal || '-'}</td>
+                    <td>${visita.ingresadoCF ? 'SÍ' : 'NO'}</td>
+                    <td>${visita.notificadoResidente ? 'SÍ' : 'NO'}</td>
+                    <td>${(visita.estado || 'LIBERADO A TIEMPO').toUpperCase()}</td>
+                    <td>${visita.fecha || '-'}</td>
+                `;
+                 if (visita.estado && visita.estado.toUpperCase() === 'EXPIRADO') {
+                    tr.classList.add('expired-row');
+                }
+                tbody.appendChild(tr);
+            });
+
+            if (filteredRecords.length === 0 && document.getElementById('historial').classList.contains('active')) {
+                tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: var(--text-color);">NO SE ENCONTRARON REGISTROS CON LOS FILTROS APLICADOS.</td></tr>';
+            }
+        }
+
+        function llenarFiltroConserjes() {
+            const selectConserje = document.getElementById('filterConserje');
+            const conserjes = new Set();
+            registroVisitas.forEach(visita => {
+                if (visita.ingresadoPor) {
+                    conserjes.add(visita.ingresadoPor.toUpperCase());
+                }
+            });
+            // Limpiar opciones existentes (excepto "TODOS")
+            selectConserje.querySelectorAll('option:not([value=""])').forEach(option => option.remove());
+            
+            Array.from(conserjes).sort().forEach(conserje => {
+                const option = document.createElement('option');
+                option.value = conserje;
+                option.textContent = conserje;
+                selectConserje.appendChild(option);
+            });
+        }
+
+        function aplicarFiltrosHistorial() {
+            // Actualizar la tabla con los filtros
+            actualizarTablaHistorial();
+        }
+
+        function resetearFiltrosHistorial() {
+            document.getElementById('filterDate').value = '';
+            document.getElementById('filterConserje').value = '';
+            document.getElementById('filterAction').value = '';
+            actualizarTablaHistorial();
+            mostrarToast("FILTROS DEL HISTORIAL REINICIADOS.", 'var(--light-color)');
+        }
+
+        function exportarPDFHistorialFiltrado() {
+            const table = document.getElementById('registroVisitasTable');
+            const head = Array.from(table.querySelector('thead th')).map(th => th.textContent.trim());
+            const body = Array.from(table.querySelector('tbody').rows).map(row => Array.from(row.cells).map(cell => cell.textContent.trim()));
+
+            if (body.length === 0 || (body.length === 1 && body[0][0].includes("NO SE ENCONTRARON REGISTROS"))) {
+                mostrarToast("NO HAY DATOS FILTRADOS PARA EXPORTAR.", 'var(--warning-color)');
+                return;
+            }
+
+            generarPDF('HISTORIAL FILTRADO DE USO DE ESTACIONAMIENTOS', head, body, 'HISTORIAL_FILTRADO_ESTACIONAMIENTOS');
+            mostrarToast("HISTORIAL FILTRADO EXPORTADO A PDF.", 'var(--secondary-color)');
+        }
+
+        function calcularEstadisticas() {
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0); // Inicio del día
+            const ayer = new Date(hoy);
+            ayer.setDate(hoy.getDate() - 1);
+
+            // Promedio diario de ocupación
+            const ocupacionesPorDia = {};
+            registroVisitas.forEach(visita => {
+                if (visita.horaIngreso) {
+                    const fechaIngreso = visita.fecha; // Ya está en YYYY-MM-DD
+                    ocupacionesPorDia[fechaIngreso] = (ocupacionesPorDia[fechaIngreso] || 0) + 1;
+                }
+            });
+
+            const fechas = Object.keys(ocupacionesPorDia).sort();
+            const ocupaciones = fechas.map(f => ocupacionesPorDia[f]);
+
+            // Eliminar los gráficos anteriores si existen
+            if (dailyOccupancyChart) dailyOccupancyChart.destroy();
+            if (avgStayTimeChart) avgStayTimeChart.destroy();
+
+            // Gráfico de Promedio Diario de Ocupación
+            const dailyOccupancyCtx = document.getElementById('dailyOccupancyChart').getContext('2d');
+            dailyOccupancyChart = new Chart(dailyOccupancyCtx, {
+                type: 'line',
+                data: {
+                    labels: fechas,
+                    datasets: [{
+                        label: 'OCUPACIONES POR DÍA',
+                        data: ocupaciones,
+                        borderColor: 'var(--primary-color)',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') }
+                        },
+                        x: {
+                            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Tiempo promedio de permanencia por vehículo
+            let totalTiempoSegundos = 0;
+            let countVisitasCompletas = 0;
+            registroVisitas.forEach(visita => {
+                if (visita.tiempoTotal) {
+                    const partes = visita.tiempoTotal.split(':');
+                    if (partes.length === 3) {
+                        const segundos = parseInt(partes[0]) * 3600 + parseInt(partes[1]) * 60 + parseInt(partes[2]);
+                        totalTiempoSegundos += segundos;
+                        countVisitasCompletas++;
+                    }
+                }
+            });
+
+            const promedioTiempoSegundos = countVisitasCompletas > 0 ? totalTiempoSegundos / countVisitasCompletas : 0;
+            const promedioTiempoFormato = formatoTiempo(promedioTiempoSegundos);
+            
+            // Gráfico de Tiempo Promedio de Permanencia
+            const avgStayTimeCtx = document.getElementById('avgStayTimeChart').getContext('2d');
+            avgStayTimeChart = new Chart(avgStayTimeCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['TIEMPO PROMEDIO'],
+                    datasets: [{
+                        label: `PROMEDIO: ${promedioTiempoFormato}`,
+                        data: [promedioTiempoSegundos / 3600], // Convertir a horas para la barra
+                        backgroundColor: 'var(--secondary-color)',
+                        borderColor: 'var(--secondary-color)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'HORAS',
+                                color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                            },
+                            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') }
+                        },
+                        x: {
+                            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') }
+                        }
+                    },
+                     plugins: {
+                        legend: {
+                            labels: {
+                                color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Horas de congestión pico (Heatmap)
+            const ocupacionesPorHora = new Array(24).fill(0);
+            const totalRegistrosHora = new Array(24).fill(0); // Para calcular promedios
+
+            registroVisitas.forEach(visita => {
+                if (visita.horaIngreso) {
+                    const horaIngresoDate = new Date(`2000-01-01T${visita.horaIngreso}`); // Usar fecha ficticia
+                    const hour = horaIngresoDate.getHours();
+                    ocupacionesPorHora[hour]++;
+                }
+                 if (visita.horaSalida) {
+                    const horaSalidaDate = new Date(`2000-01-01T${visita.horaSalida}`);
+                    const hour = horaSalidaDate.getHours();
+                    // También considerar las salidas para una visión más completa de la congestión
+                    // Esto puede ajustarse según la definición exacta de "congestión"
+                    ocupacionesPorHora[hour]++; 
+                }
+            });
+
+            const maxOcupacionHora = Math.max(...ocupacionesPorHora);
+            const heatmapGrid = document.getElementById('congestionHeatmap');
+
+            // Limpiar celdas anteriores (excepto las etiquetas de horas)
+            Array.from(heatmapGrid.children).filter(child => !child.classList.contains('hour-label')).forEach(child => child.remove());
+
+            // Añadir celdas de datos
+            for (let i = 0; i < 24; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'heatmap-cell';
+                const count = ocupacionesPorHora[i];
+                let level = 0;
+                if (maxOcupacionHora > 0) {
+                    level = Math.min(6, Math.floor((count / maxOcupacionHora) * 6)); // Escala de 0 a 6
+                }
+                cell.classList.add(`level-${level}`);
+                cell.innerHTML = `${String(i).padStart(2, '0')}h <span class="count">${count}</span>`;
+                heatmapGrid.appendChild(cell);
+            }
+        }
+
+
+        // --- EXPORTACIÓN / IMPRESIÓN ---
+        function exportarExcel() {
+            if (registroVisitas.length === 0) {
+                mostrarToast("NO HAY DATOS EN EL HISTORIAL PARA EXPORTAR.", 'var(--warning-color)');
+                return;
+            }
+            const datosExportar = registroVisitas.map(v => ({
+                'N° EST.': v.estacionamiento,
+                'NOMBRE': (v.nombre || '').toUpperCase(),
+                'RUT': (v.rut || '').toUpperCase(),
+                'PATENTE': (v.patente || '').toUpperCase(),
+                'UNIDAD': (v.unidad || '').toUpperCase(),
+                'INGRESADO POR': (v.ingresadoPor || '').toUpperCase(),
+                'H. INGRESO': v.horaIngreso,
+                'H. SALIDA': v.horaSalida,
+                'T. TOTAL': v.tiempoTotal,
+                'ING. CF': v.ingresadoCF ? 'SÍ' : 'NO',
+                'NOTIF. RESID.': v.notificadoResidente ? 'SÍ' : 'NO',
+                'ESTADO': (v.estado || '').toUpperCase(),
+                'FECHA': v.fecha || '-'
+            }));
+            const worksheet = XLSX.utils.json_to_sheet(datosExportar);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "HistorialVisitas");
+            XLSX.writeFile(workbook, `HISTORIAL_ESTACIONAMIENTOS_${fechaFormatoArchivo()}.xlsx`);
+            mostrarToast("HISTORIAL EXPORTADO A EXCEL.", 'var(--secondary-color)');
+        }
+
+        function generarPDF(titulo, head, bodyData, nombreArchivo) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+
+            doc.setFontSize(14);
+            doc.text(titulo.toUpperCase(), 14, 15);
+            doc.setFontSize(8);
+            doc.text(`GENERADO: ${new Date().toLocaleString('es-CL')}`, 14, 21);
+
+            const bodyDataProcessed = bodyData.map(row => row.map(cell => {
+                if (typeof cell === 'boolean') return cell ? 'SÍ' : 'NO';
+                return (cell === null || typeof cell === 'undefined') ? '' : String(cell).toUpperCase();
+            }));
+
+            doc.autoTable({
+                head: [head.map(h => h.toUpperCase())],
+                body: bodyDataProcessed,
+                startY: 25,
+                theme: 'grid',
+                headStyles: { fillColor: [52, 152, 219], textColor: [255,255,255], fontStyle: 'bold' },
+                styles: { fontSize: 6, cellPadding: 1, overflow: 'linebreak' },
+                columnStyles: { 
+                    0: { cellWidth: 12 }, 
+                    1: { cellWidth: 28 }, 
+                    2: { cellWidth: 18 }, 
+                    3: { cellWidth: 18 }, 
+                    4: { cellWidth: 18 }, 
+                    5: { cellWidth: 22 }, 
+                    6: { cellWidth: 20 }, 
+                    7: { cellWidth: 20 }, 
+                    8: { cellWidth: 18 }, 
+                    9: { cellWidth: 10 }, 
+                    10: { cellWidth: 10 }, 
+                    11: { cellWidth: 18 },
+                    12: { cellWidth: 18 } 
+                } 
+            });
+            doc.save(`${nombreArchivo.toUpperCase()}_${fechaFormatoArchivo()}.pdf`);
+        }
         
-        // --- BÚSQUEDA GLOBAL MEJORADA ---
+        function exportarPDFHistorial() {
+            if (registroVisitas.length === 0) {
+                mostrarToast("NO HAY DATOS EN EL HISTORIAL PARA EXPORTAR.", 'var(--warning-color)');
+                return;
+            }
+            const head = ['N° EST.', 'NOMBRE', 'RUT', 'PATENTE', 'UNIDAD', 'INGRESADO POR', 'H. ING.', 'H. SAL.', 'T. TOTAL', 'CF', 'NOTIF.', 'ESTADO', 'FECHA'];
+            const body = registroVisitas.map(v => [
+                v.estacionamiento, v.nombre, v.rut, v.patente, v.unidad, v.ingresadoPor,
+                v.horaIngreso, v.horaSalida, v.tiempoTotal, 
+                v.ingresadoCF, v.notificadoResidente, v.estado, v.fecha
+            ]);
+            generarPDF('HISTORIAL DE USO DE ESTACIONAMIENTOS', head, body, 'HISTORIAL_ESTACIONAMIENTOS');
+            mostrarToast("HISTORIAL EXPORTADO A PDF.", 'var(--secondary-color)');
+        }
+
+        function exportarPDFActual(forEmail = false) {
+            const ocupados = estacionamientos.filter(est => est.ocupado && est.datosVehiculo);
+            if (ocupados.length === 0 && !forEmail) { 
+                mostrarToast("NO HAY ESTACIONAMIENTOS EN USO ACTUALMENTE.", 'var(--warning-color)');
+                return null; 
+            }
+
+            const head = ['N° EST.', 'NOMBRE', 'RUT', 'PATENTE', 'UNIDAD', 'INGRESADO POR', 'H. ING.', 'T. REST.', 'CF', 'NOTIF.'];
+            const body = ocupados.map(est => [
+                est.id,
+                est.datosVehiculo.nombre,
+                est.datosVehiculo.rut,
+                est.datosVehiculo.patente,
+                est.datosVehiculo.unidad,
+                est.datosVehiculo.ingresadoPor,
+                est.datosVehiculo.horaIngresoDisplay,
+                formatoTiempo(est.tiempoRestanteSegundos),
+                est.datosVehiculo.ingresadoCF,
+                est.datosVehiculo.notificadoResidente
+            ]);
+            
+            const titulo = 'INFORME DE ESTACIONAMIENTOS EN USO - CUMBRES DE QUILPUÉ';
+            const nombreArchivo = 'USO_ACTUAL_ESTACIONAMIENTOS';
+
+            if (forEmail) { 
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'landscape' });
+                doc.setFontSize(14);
+                doc.text(titulo.toUpperCase(), 14, 15);
+                doc.setFontSize(8);
+                doc.text(`GENERADO: ${new Date().toLocaleString('es-CL')}`, 14, 21);
+
+                const bodyDataProcessed = body.map(row => row.map(cell => {
+                     if (typeof cell === 'boolean') return cell ? 'SÍ' : 'NO';
+                     return (cell === null || typeof cell === 'undefined') ? '' : String(cell).toUpperCase();
+                }));
+
+                if (ocupados.length > 0) {
+                    doc.autoTable({
+                        head: [head.map(h => h.toUpperCase())], body: bodyDataProcessed, startY: 25, theme: 'grid',
+                        headStyles: { fillColor: [52, 152, 219], textColor: [255,255,255], fontStyle: 'bold' },
+                        styles: { fontSize: 6, cellPadding: 1, overflow: 'linebreak' },
+                        columnStyles: { 
+                            0: { cellWidth: 12 }, 
+                            1: { cellWidth: 30 }, 
+                            2: { cellWidth: 20 }, 
+                            3: { cellWidth: 20 }, 
+                            4: { cellWidth: 20 }, 
+                            5: { cellWidth: 25 }, 
+                            6: { cellWidth: 22 }, 
+                            7: { cellWidth: 20 }, 
+                            8: { cellWidth: 10 }, 
+                            9: { cellWidth: 12 }
+                        } 
+                    });
+                } else {
+                     doc.text("NO HAY ESTACIONAMIENTOS EN USO EN ESTE MOMENTO.", 14, 35);
+                }
+                return doc; 
+            } else { 
+                generarPDF(titulo, head, body, nombreArchivo);
+                mostrarToast("REPORTE DE USO ACTUAL EXPORTADO A PDF.", 'var(--secondary-color)');
+                return null;
+            }
+        }
+
+        // --- NOTIFICACIÓN A LA ADMINISTRACIÓN (NUEVO) ---
+        function notificarAdministracion() {
+            mostrarToast("GENERANDO PDF para la administración...", 'var(--primary-color)');
+            const pdfDoc = exportarPDFActual(true); // Generar PDF para el envío
+
+            if (pdfDoc) {
+                // Generar un Data URI para el PDF (simula adjunto)
+                const pdfDataUri = pdfDoc.output('datauristring');
+
+                // Enviar correo (esto es una simulación en el frontend)
+                // En un entorno de producción real, necesitarías un backend para enviar correos.
+                // Aquí, abrimos el cliente de correo por defecto con el PDF codificado en el cuerpo (limitado por tamaño y cliente).
+                // Una solución robusta implicaría enviar el PDF a un servidor que lo adjunte y envíe.
+
+                const subject = encodeURIComponent("INFORME DIARIO DE ESTACIONAMIENTOS EN USO - CUMBRES DE QUILPUÉ");
+                const body = encodeURIComponent(
+                    "Estimados,\n\n" +
+                    "Adjunto encontrarán el informe actual de los estacionamientos en uso. " +
+                    "Este informe incluye detalles de los vehículos y tiempos de ocupación.\n\n" +
+                    "Saludos cordiales,\n" +
+                    "Sistema de Control de Estacionamientos\n\n" +
+                    "NOTA: El PDF se ha intentado adjuntar o se ha codificado en el cuerpo del mensaje si es pequeño. Para archivos grandes, esto podría no funcionar en todos los clientes de correo."
+                );
+
+                // Enlace mailto con los destinatarios y el asunto
+                // Intentar incrustar el PDF como un data URI, aunque esto solo funciona en algunos clientes de correo para PDFs muy pequeños.
+                // Para una solución robusta, se requiere un servidor.
+                const mailtoLink = `mailto:${CORREO_DESTINO_1};${CORREO_DESTINO_2}?subject=${subject}&body=${body}`; // &attach=${pdfDataUri} (esto no funciona directamente en mailto para adjuntos grandes)
+                
+                window.location.href = mailtoLink;
+                mostrarToast("ABRIENDO CLIENTE DE CORREO PARA NOTIFICAR A LA ADMINISTRACIÓN. POR FAVOR, CONFIRME EL ENVÍO.", 'var(--secondary-color)', 7000);
+            } else {
+                mostrarToast("NO HAY DATOS PARA ENVIAR A LA ADMINISTRACIÓN.", 'var(--warning-color)');
+            }
+        }
+
+
+        // --- FUNCIONES DE BÚSQUEDA ---
+        function manejarBusqueda(event) {
+            if (event.key === 'Enter') {
+                ejecutarBusqueda();
+            }
+        }
+
         function ejecutarBusqueda() {
             const searchTerm = document.getElementById('searchInput').value.trim().toUpperCase();
             if (!searchTerm) {
@@ -1111,312 +1909,59 @@
             busquedaActiva = true;
             resultadosBusqueda = [];
 
-            const resultadosEnUso = [];
+            // Buscar en estacionamientos en uso
             estacionamientos.forEach(est => {
                 if (est.ocupado && est.datosVehiculo) {
                     const data = est.datosVehiculo;
-                    const searchString = `${est.id} ${data.patente} ${data.nombre} ${data.rut} ${data.unidad} ${data.ingresadoPor}`;
-                    if (searchString.toUpperCase().includes(searchTerm)) {
-                        resultadosEnUso.push({ type: 'estacionamiento', data: est });
+                    const searchString = `${est.id} ${data.patente} ${data.nombre} ${data.rut} ${data.unidad} ${data.ingresadoPor}`.toUpperCase();
+                    if (searchString.includes(searchTerm)) {
+                        resultadosBusqueda.push({ type: 'estacionamiento', data: est });
                     }
                 }
             });
 
-            const resultadosHistorial = [];
+            // Buscar en el historial
             registroVisitas.forEach(visita => {
-                const searchString = `${visita.estacionamiento} ${visita.patente} ${visita.nombre} ${visita.rut} ${visita.unidad} ${visita.ingresadoPor} ${visita.estado} ${visita.fecha}`;
-                if (searchString.toUpperCase().includes(searchTerm)) {
-                    resultadosHistorial.push({ type: 'historial', data: visita });
+                const searchString = `${visita.estacionamiento} ${visita.patente} ${visita.nombre} ${visita.rut} ${visita.unidad} ${visita.ingresadoPor} ${visita.estado} ${visita.fecha}`.toUpperCase();
+                if (searchString.includes(searchTerm)) {
+                    resultadosBusqueda.push({ type: 'historial', data: visita });
                 }
             });
 
-            resultadosBusqueda = [...resultadosEnUso, ...resultadosHistorial];
-            
-            const activeTabId = document.querySelector('.tab.active').getAttribute('onclick').match(/'([^']+)'/)[1];
+            // Si la búsqueda se activa, actualizar la pestaña activa con los resultados
+            const activeTabId = document.querySelector('.tab.active').dataset.tabId;
             if (activeTabId === 'en-uso') {
                 actualizarDisplayEstacionamientos();
             } else if (activeTabId === 'historial') {
                 actualizarTablaHistorial();
+            } else if (activeTabId === 'estadisticas') {
+                // Las estadísticas no se filtran por búsqueda directa, se re-renderizan normalmente
+                calcularEstadisticas();
             }
-
-            mostrarToast(`BÚSQUEDA: ${resultadosEnUso.length} EN USO / ${resultadosHistorial.length} EN HISTORIAL`, 'var(--secondary-color)', 4000);
+            
+            if (resultadosBusqueda.length > 0) {
+                mostrarToast(`BÚSQUEDA COMPLETA. ${resultadosBusqueda.length} RESULTADOS ENCONTRADOS.`, 'var(--secondary-color)');
+            } else {
+                mostrarToast("NO SE ENCONTRARON RESULTADOS.", 'var(--warning-color)');
+            }
         }
 
         function resetearBusqueda() {
             document.getElementById('searchInput').value = '';
             busquedaActiva = false;
             resultadosBusqueda = [];
-            resetearFiltrosHistorial(); // También resetea los filtros de historial
+            // Resetear filtros de historial también
+            document.getElementById('filterDate').value = '';
+            document.getElementById('filterConserje').value = '';
+            document.getElementById('filterAction').value = '';
+
             actualizarDisplayEstacionamientos();
-            actualizarTablaHistorial();
+            actualizarTablaHistorial(); // Esto ahora tendrá en cuenta los filtros si se reestablecen
             mostrarToast("BÚSQUEDA Y FILTROS REINICIADOS.", 'var(--light-color)');
         }
-        
-        // --- ESTADÍSTICAS AVANZADAS (NUEVO Y MEJORADO) ---
-        function calcularEstadisticas() {
-            // Destruir gráficos anteriores para evitar solapamiento
-            if (dailyOccupancyChart) dailyOccupancyChart.destroy();
-            if (topUnitsChart) topUnitsChart.destroy();
-            if (avgStayByUnitChart) avgStayByUnitChart.destroy();
 
-            const startDate = document.getElementById('statsStartDate').value;
-            const endDate = document.getElementById('statsEndDate').value;
 
-            // Filtrar historial por rango de fechas
-            const registrosFiltrados = registroVisitas.filter(visita => {
-                if (!startDate || !endDate) return true; // Si no hay rango, usar todos los datos
-                return visita.fecha >= startDate && visita.fecha <= endDate;
-            });
-
-            if (registrosFiltrados.length === 0) {
-                mostrarToast("NO HAY DATOS EN EL RANGO DE FECHAS SELECCIONADO PARA GENERAR ESTADÍSTICAS.", 'var(--warning-color)');
-                return;
-            }
-
-            // 1. Top Unidades con más visitas
-            const visitasPorUnidad = registrosFiltrados.reduce((acc, visita) => {
-                const unidad = visita.unidad || 'SIN UNIDAD';
-                acc[unidad] = (acc[unidad] || 0) + 1;
-                return acc;
-            }, {});
-            const topUnidades = Object.entries(visitasPorUnidad).sort(([,a],[,b]) => b - a).slice(0, 5);
-            
-            const topUnitsCtx = document.getElementById('topUnitsChart').getContext('2d');
-            topUnitsChart = new Chart(topUnitsCtx, {
-                type: 'bar',
-                data: {
-                    labels: topUnidades.map(item => item[0]),
-                    datasets: [{
-                        label: 'NÚMERO DE VISITAS',
-                        data: topUnidades.map(item => item[1]),
-                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-            });
-
-            // 2. Duración promedio por unidad
-            const duracionPorUnidad = registrosFiltrados.reduce((acc, visita) => {
-                const unidad = visita.unidad || 'SIN UNIDAD';
-                if (!acc[unidad]) {
-                    acc[unidad] = { totalSegundos: 0, count: 0 };
-                }
-                acc[unidad].totalSegundos += visita.tiempoTotalSegundos || 0;
-                acc[unidad].count++;
-                return acc;
-            }, {});
-            const avgDuracion = Object.entries(duracionPorUnidad)
-                .map(([unidad, data]) => ({ unidad, avgMinutos: (data.totalSegundos / data.count / 60) }))
-                .sort((a, b) => b.avgMinutos - a.avgMinutos).slice(0, 5);
-
-            const avgStayCtx = document.getElementById('avgStayByUnitChart').getContext('2d');
-            avgStayByUnitChart = new Chart(avgStayCtx, {
-                type: 'bar',
-                data: {
-                    labels: avgDuracion.map(item => item.unidad),
-                    datasets: [{
-                        label: 'DURACIÓN PROMEDIO (MINUTOS)',
-                        data: avgDuracion.map(item => item.avgMinutos.toFixed(2)),
-                        backgroundColor: 'rgba(243, 156, 18, 0.7)',
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-            });
-
-            // 3. Histórico de ocupación máxima y mínima diaria
-            const ocupacionPorDia = registrosFiltrados.reduce((acc, visita) => {
-                const fecha = visita.fecha;
-                acc[fecha] = (acc[fecha] || 0) + 1;
-                return acc;
-            }, {});
-            const ocupacionesDiarias = Object.values(ocupacionPorDia);
-            document.getElementById('maxOccupancy').textContent = ocupacionesDiarias.length > 0 ? Math.max(...ocupacionesDiarias) : '0';
-            document.getElementById('minOccupancy').textContent = ocupacionesDiarias.length > 0 ? Math.min(...ocupacionesDiarias) : '0';
-            
-            // 4. Gráfico de Ocupación diaria (existente, pero con datos filtrados)
-            const dailyOccupancyCtx = document.getElementById('dailyOccupancyChart').getContext('2d');
-            dailyOccupancyChart = new Chart(dailyOccupancyCtx, {
-                type: 'line',
-                data: {
-                    labels: Object.keys(ocupacionPorDia).sort(),
-                    datasets: [{
-                        label: 'OCUPACIONES POR DÍA',
-                        data: Object.keys(ocupacionPorDia).sort().map(fecha => ocupacionPorDia[fecha]),
-                        borderColor: 'var(--primary-color)',
-                        tension: 0.1
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-            });
-            
-            // 5. Heatmap de ocupación por hora y día de la semana
-            const heatmapData = Array(7).fill(0).map(() => Array(24).fill(0)); // 7 días, 24 horas
-            const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            registrosFiltrados.forEach(visita => {
-                const ingresoDate = new Date(visita.fecha + 'T' + visita.horaIngreso);
-                const dia = ingresoDate.getDay();
-                const hora = ingresoDate.getHours();
-                heatmapData[dia][hora]++;
-            });
-
-            const heatmapContainer = document.getElementById('heatmapContainer');
-            heatmapContainer.innerHTML = ''; // Limpiar
-            const maxCount = Math.max(...heatmapData.flat());
-
-            // Crear etiquetas de horas
-            const hourLabels = document.createElement('div');
-            hourLabels.className = 'heatmap-hour-labels';
-            for (let h = 0; h < 24; h++) {
-                const label = document.createElement('div');
-                label.className = 'heatmap-hour-label';
-                label.textContent = h;
-                hourLabels.appendChild(label);
-            }
-            heatmapContainer.appendChild(hourLabels);
-
-            heatmapData.forEach((horas, diaIndex) => {
-                const row = document.createElement('div');
-                row.className = 'heatmap-day-row';
-                const dayLabel = document.createElement('div');
-                dayLabel.className = 'heatmap-day-label';
-                dayLabel.textContent = diasSemana[diaIndex];
-                row.appendChild(dayLabel);
-                
-                const grid = document.createElement('div');
-                grid.className = 'heatmap-grid';
-                horas.forEach((count, horaIndex) => {
-                    const cell = document.createElement('div');
-                    cell.className = 'heatmap-cell';
-                    let level = 0;
-                    if (maxCount > 0) {
-                        level = Math.ceil((count / maxCount) * 4); // 4 niveles de color
-                    }
-                    cell.dataset.level = level;
-                    cell.innerHTML = `<span class="tooltip">${count} visitas<br>${diasSemana[diaIndex]} ${horaIndex}:00-${horaIndex}:59</span>`;
-                    grid.appendChild(cell);
-                });
-                row.appendChild(grid);
-                heatmapContainer.appendChild(row);
-            });
-        }
-        
-        // --- REPORTES PROGRAMADOS (NUEVO Y MEJORADO) ---
-        function getHistoryLast48Hours() {
-            const now = new Date();
-            const ms48HoursAgo = now.getTime() - (48 * 60 * 60 * 1000);
-            return registroVisitas.filter(visita => {
-                const visitTime = new Date(visita.fecha + 'T' + visita.horaSalida).getTime();
-                return visitTime >= ms48HoursAgo;
-            });
-        }
-
-        function generarInformeCompletoEmailBody() {
-            let body = "INFORME AUTOMÁTICO DE ESTACIONAMIENTOS\n";
-            body += `GENERADO: ${new Date().toLocaleString('es-CL')}\n\n`;
-            
-            // Sección 1: En Uso
-            body += "--- ESTACIONAMIENTOS EN USO ACTUALMENTE ---\n";
-            const ocupados = estacionamientos.filter(e => e.ocupado);
-            if (ocupados.length > 0) {
-                ocupados.forEach(est => {
-                    const d = est.datosVehiculo;
-                    body += `EST. ${est.id}: PAT. ${d.patente}, UNIDAD ${d.unidad}, ING. ${d.horaIngresoDisplay}, T. REST. ${formatoTiempo(est.tiempoRestanteSegundos)}\n`;
-                });
-            } else {
-                body += "No hay estacionamientos en uso.\n";
-            }
-            body += "\n";
-
-            // Sección 2: Historial últimas 48h
-            body += "--- HISTORIAL DE USO (ÚLTIMAS 48 HORAS) ---\n";
-            const historial48h = getHistoryLast48Hours();
-            if (historial48h.length > 0) {
-                 historial48h.forEach(v => {
-                    body += `EST. ${v.estacionamiento} (PAT. ${v.patente}, UNIDAD ${v.unidad}): ING. ${v.fecha} ${v.horaIngreso}, SAL. ${v.horaSalida}, T. TOTAL ${v.tiempoTotal}\n`;
-                });
-            } else {
-                body += "No hay registros en las últimas 48 horas.\n";
-            }
-            
-            return body;
-        }
-
-        function configurarReportesProgramados() {
-            setInterval(() => {
-                const ahora = new Date();
-                // Ejecutar una vez al día, por ejemplo a las 23:00
-                if (ahora.getHours() === 23 && ahora.getMinutes() === 0) {
-                    console.log("SIMULANDO ENVÍO DE REPORTE DIARIO PROGRAMADO...");
-                    const emailBody = generarInformeCompletoEmailBody();
-                    const subject = "Reporte Diario Automático - Estacionamientos Cumbres de Quilpué";
-                    
-                    // Simulación: en un entorno real, esto se enviaría a un backend.
-                    console.log("--- INICIO REPORTE PARA EMAIL ---");
-                    console.log(`PARA: ${CORREO_DESTINO_1}, ${CORREO_DESTINO_2}`);
-                    console.log(`ASUNTO: ${subject}`);
-                    console.log(emailBody);
-                    console.log("--- FIN REPORTE ---");
-                    
-                    mostrarToast("SIMULACIÓN: REPORTE DIARIO GENERADO EN CONSOLA.", 'var(--primary-color)', 10000);
-                }
-            }, 60 * 1000); // Revisar cada minuto
-        }
-
-        // El resto de funciones (manejo de tabs, exportaciones, alertas, etc.) se mantienen en gran parte como estaban,
-        // ya que su lógica subyacente sigue siendo válida. Se omiten aquí por brevedad.
-        // Las funciones clave modificadas están arriba.
-        // Pegar el resto del script original aquí, asegurándose de que funciones como notificarAdministracion, etc. sigan presentes.
-        
-        // --- FUNCIONES ORIGINALES (para completitud) ---
-        // (Copiar aquí las funciones no modificadas del script original como:
-        // notificarAdministracion, exportarExcel, exportarPDFActual, exportarPDFHistorial, 
-        // formatoTiempo, fechaFormatoArchivo, mostrarTab, mostrarToast, toggleDarkMode, cargarPreferenciaModoOscuro, etc.)
-        // A continuación se pegan las más relevantes para asegurar que todo funcione.
-
-        function mostrarTab(tabId, element) {
-            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            element.classList.add('active');
-
-            // Resetear búsqueda al cambiar de pestaña si está activa
-            if(busquedaActiva) resetearBusqueda();
-            
-            if (tabId === 'historial') {
-                llenarFiltroConserjes();
-                actualizarTablaHistorial();
-            } else if (tabId === 'estadisticas') {
-                calcularEstadisticas();
-            } else {
-                 actualizarDisplayEstacionamientos();
-            }
-        }
-        
-        function mostrarToast(mensaje, bgColor = 'var(--dark-color)', duracion = 3000) {
-            const toast = document.getElementById('toast');
-            toast.textContent = mensaje.toUpperCase();
-            toast.style.backgroundColor = bgColor;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, duracion);
-        }
-
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const isDarkMode = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDarkMode);
-            document.getElementById('darkModeToggle').innerHTML = isDarkMode ? '<i class="fas fa-sun"></i> MODO CLARO' : '<i class="fas fa-moon"></i> MODO OSCURO';
-            if (document.getElementById('estadisticas').classList.contains('active')) {
-                calcularEstadisticas();
-            }
-        }
-
-        function cargarPreferenciaModoOscuro() {
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.body.classList.add('dark-mode');
-                document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun"></i> MODO CLARO';
-            }
-        }
-        
+        // --- UTILIDADES ---
         function formatoTiempo(totalSegundos) {
             if (isNaN(totalSegundos) || totalSegundos < 0) totalSegundos = 0;
             const horas = Math.floor(totalSegundos / 3600);
@@ -1424,12 +1969,101 @@
             const segundos = Math.floor(totalSegundos % 60); 
             return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
         }
-        
-        // ... (resto de funciones del script original)
-        // Por favor, copie y pegue el resto de las funciones auxiliares no modificadas del script original aquí.
-        // Por ejemplo: cerrarModal, confirmarOcupar, mostrarCustomAlert, exportarPDFActual, etc. para garantizar la funcionalidad completa.
-        // El código proporcionado en este bloque ya contiene las mejoras clave solicitadas.
 
+        function fechaFormatoArchivo() {
+            const d = new Date();
+            return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        function mostrarTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (element) element.classList.add('active'); 
+            
+            // Re-renderizar contenido al cambiar de pestaña
+            if (tabId === 'en-uso') {
+                actualizarDisplayEstacionamientos();
+            } else if (tabId === 'historial') {
+                llenarFiltroConserjes(); // Asegurar que el filtro de conserjes esté actualizado
+                actualizarTablaHistorial();
+            } else if (tabId === 'estadisticas') {
+                calcularEstadisticas(); // Calcular y mostrar gráficos
+            }
+            // Resetear búsqueda si la pestaña no es la misma que la búsqueda o si no hay búsqueda activa
+            if (!busquedaActiva && document.getElementById('searchInput').value !== '') {
+                document.getElementById('searchInput').value = '';
+            }
+        }
+
+        function mostrarToast(mensaje, bgColor = 'var(--dark-color)', duracion = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensaje.toUpperCase();
+            toast.style.backgroundColor = bgColor;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duracion);
+        }
+
+        // --- MODO OSCURO (NUEVO) ---
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            // Actualizar el texto del botón y el icono
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (isDarkMode) {
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i> MODO CLARO';
+            } else {
+                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i> MODO OSCURO';
+            }
+            // Si estás en la pestaña de estadísticas, refrescar gráficos para colores de texto
+            if (document.getElementById('estadisticas').classList.contains('active')) {
+                calcularEstadisticas();
+            }
+        }
+
+        function cargarPreferenciaModoOscuro() {
+            const savedMode = localStorage.getItem('darkMode');
+            if (savedMode === 'true') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun"></i> MODO CLARO';
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-moon"></i> MODO OSCURO';
+            }
+        }
+
+
+        // --- "ENVÍO AUTOMÁTICO DE CORREO" (SIMULACIÓN/PREPARACIÓN) ---
+        function configurarRevisionAutomaticaEmail() {
+            setInterval(() => {
+                const ahora = new Date();
+                const hora = ahora.getHours();
+                const minutos = ahora.getMinutes();
+
+                if ((hora === 11 && minutos === 0) || (hora === 23 && minutos === 0)) {
+                    console.log(`PREPARANDO INFORME PARA ENVÍO A LAS ${String(hora).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`);
+                    prepararYSimularEnvioEmail();
+                }
+            }, 60 * 1000); 
+        }
+
+        function prepararYSimularEnvioEmail() {
+            mostrarToast("GENERANDO INFORME PDF PARA ENVÍO PROGRAMADO...", 'var(--primary-color)');
+            const pdfDoc = exportarPDFActual(true); 
+
+            if (pdfDoc) {
+                const pdfDataUri = pdfDoc.output('datauristring'); 
+                console.log(`PDF GENERADO PARA ENVIAR A ${CORREO_DESTINO_1} Y ${CORREO_DESTINO_2}`);
+                console.log("DATA URI DEL PDF (PARA DEMOSTRACIÓN):", pdfDataUri.substring(0,100) + "..."); 
+                mostrarToast(`INFORME PDF PREPARADO. EN UN SISTEMA REAL, SE ENVIARÍA A ${CORREO_DESTINO_1} Y ${CORREO_DESTINO_2}.`, 'var(--secondary-color)', 7000);
+            } else {
+                mostrarToast("NO SE GENERÓ PDF PARA EL ENVÍO PROGRAMADO (POSIBLEMENTE NO HAY DATOS).", 'var(--warning-color)');
+                console.log(`INFORME PARA ${CORREO_DESTINO_1} Y ${CORREO_DESTINO_2}: NO HAY VEHÍCULOS ESTACIONADOS.`);
+            }
+        }
     </script>
 </body>
 </html>
